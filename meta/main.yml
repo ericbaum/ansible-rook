@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Eric Baum
+  description: github.com/ericbaum
+  company: CPqD
+
+  license: GPLv3
+
+  min_ansible_version: 2.5
+
+  platforms:
+  - name: Kubernetes
+     versions:
+     - 1.11.x
+
+  galaxy_tags:
+    - rook
+    - ceph
+    - storage
+    - kubernetes
+    - cloud
+
+# This role has no dependencies
+dependencies: []

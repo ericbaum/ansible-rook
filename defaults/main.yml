@@ -1,0 +1,16 @@
+---
+# defaults file for ansible-rook
+
+kubeconfig_file_path:
+rook_bootstrap: true
+
+rook_version: master
+
+rook_operator_namespace: rook-ceph-system
+rook_cluster_namespace: rook-ceph
+
+rook_kubernetes_rbac_enabled: true
+rook_log_level: INFO
+
+rook_mon_healthcheck: 45s
+rook_mon_timeout: 300s
