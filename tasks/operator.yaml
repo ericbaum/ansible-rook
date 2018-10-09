@@ -104,3 +104,13 @@
   retries: 30
   delay: 10
 
+- name: ROOK - Verify if the agents are running
+  k8s:
+    api_version: extensions/v1beta1
+    kind: DaemonSet
+    name: rook-ceph-agent
+    namespace: "{{ rook_operator_namespace }}"
+  register: daemonset_data
+  until: daemonset_data.result.status.desiredNumberScheduled == daemonset_data.result.status.numberReady
+  retries: 30
+  delay: 10

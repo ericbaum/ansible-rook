@@ -1,7 +1,7 @@
 Ansible Rook
 =========
 
-This module is responsible for deploying rook over a
+This role is responsible for deploying rook over a
 Kubernetes Infrastructure. It can be executed locally,
 connecting to an external kubernetes or can be run directly
 on the kubernetes nodes.
@@ -9,17 +9,19 @@ on the kubernetes nodes.
 Requirements
 ------------
 
-This modules uses the k8s_raw module which depends on Openshift:
+This role uses the k8s module which depends on Openshift:
 
-* openshift == 0.4.3
+* openshift == 0.7.2
 * PyYAML >= 3.11
+
+This role is actually capable of deploying Rook version 0.8.3
 
 Role Variables
 --------------
 
-**TODO: Fill this up**
+[defaults/main.yml](defaults/main.yml)
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+[vars/main.yml](vars/main.yml)
 
 Dependencies
 ------------
@@ -29,18 +31,18 @@ This role has no depencies
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
+    - hosts: kubernetes-master-node
       roles:
-         - { role: username.rolename, x: 42 }
+         - { role: ansible-rook, rook_osd_device_filter: sdb, rook_mon_count: 1 }
 
 License
 -------
 
-BSD
+GPLv3
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Eric Baum, 2018 
+
+https://github.com/ericbaum
