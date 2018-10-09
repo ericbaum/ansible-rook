@@ -9,7 +9,7 @@ galaxy_info:
 
   platforms:
   - name: Kubernetes
-     versions:
+    versions:
      - 1.11.x
 
   galaxy_tags:
