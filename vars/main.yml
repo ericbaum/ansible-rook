@@ -1,0 +1,5 @@
+---
+# vars file for ansible-rook
+
+# Define the filter used to locating the disks that will be associated to OSDs
+rook_osd_device_filter: ""

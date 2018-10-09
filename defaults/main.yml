@@ -1,0 +1,40 @@
+---
+# defaults file for ansible-rook
+
+kubeconfig_file_path:
+rook_bootstrap: true
+
+rook_version: master
+
+# Name of the namespaces for the operator and for the cluster
+rook_operator_namespace: rook-ceph-system
+rook_cluster_namespace: rook-ceph
+
+# RBAC is enabled on kubernetes
+rook_kubernetes_rbac_enabled: true
+
+# Log level is set to info on the operator
+rook_log_level: INFO
+
+# Monitors configurations
+rook_mon_count: 3
+rook_mon_multiple_per_node: false
+rook_mon_healthcheck: 45s
+rook_mon_timeout: 300s
+
+# Enable ceph dashboard
+rook_dashboard_enabled: true
+
+# Path on the host where rook data will be saved
+rook_data_host_path: "/var/lib/rook/"
+
+# Disable the usage of the host network by the ceph cluster
+rook_use_host_net: false
+
+# To define where ceph services will be scheduled, the label with a key defined below must be defined on the node
+rook_node_label_key: ceph-role
+# The value used for each type of service is set below:
+rook_node_label_all: all
+rook_node_label_mon: mon
+rook_node_label_mgr: mon
+rook_node_label_osd: osd

@@ -1,0 +1,33 @@
+---
+# tasks file for ansible-rook
+
+# This tasks files is responsible for deploying the rook operator
+# It also includes tasks for initializing other configured components
+
+- name: ROOK Bootstrap - Install pip if necessary
+  when: ansible_python.version.major == 2
+  package:
+    name: python-pip
+    state: present
+
+- name: ROOK Bootstrap - Install pip if necessary
+  when: ansible_python.version.major == 3
+  package:
+    name: python3-pip
+    state: present
+
+# Bootstrap a node with openshift dependency if required
+- name: ROOK Bootstrap - Install openshift python library
+  pip:
+    name: openshift
+    version: 0.7.2
+  when: rook_bootstrap
+
+# Instantiate the operator on the cluster
+- include_tasks: operator.yaml
+
+# Create a ceph cluster
+- include_tasks: cluster.yaml
+
+# TODO: Create a pool and a storageclass
+# TODO: Install other rook components as required

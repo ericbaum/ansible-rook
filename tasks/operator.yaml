@@ -1,0 +1,116 @@
+# Initialize rook operator
+
+- name: ROOK - Create operator namespace
+  k8s:
+    name: "{{ rook_operator_namespace }}"
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+# Define rook custom resources
+
+- name: ROOK - Define Cluster CustomResource
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('file', 'operator/cluster_crd.yaml') | from_yaml }}"
+
+- name: ROOK - Define Filesystem CustomResource
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('file', 'operator/filesystem_crd.yaml') | from_yaml }}"
+
+- name: ROOK - Define ObjectStore CustomResource
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('file', 'operator/object_store_crd.yaml') | from_yaml }}"
+
+- name: ROOK - Define Pool CustomResource
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('file', 'operator/pool_crd.yaml') | from_yaml }}"
+
+- name: ROOK - Define Volume CustomResource
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('file', 'operator/volume_crd.yaml') | from_yaml }}"
+
+# Define RBAC roles
+
+- name: ROOK - Define RBAC Cluster Role for Cluster Mgmt
+  when: rook_kubernetes_rbac_enabled
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('file', 'operator/cluster_mgmt_rbac_cr.yaml') | from_yaml }}"
+
+- name: ROOK - Define RBAC Role for the operator system namespace
+  when: rook_kubernetes_rbac_enabled
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('template', 'operator/ceph_system_role.yaml') | from_yaml }}"
+
+- name: ROOK - Define RBAC Cluster Role for managing the Rook CRDs
+  when: rook_kubernetes_rbac_enabled
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('file', 'operator/rook_global_rbac_cr.yaml') | from_yaml }}"
+
+- name: ROOK - Define RBAC Service Account for the operator system namespace
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('template', 'operator/ceph_system_sa.yaml') | from_yaml }}"
+
+- name: ROOK - Define RBAC Role Binding for the operator system namespace
+  when: rook_kubernetes_rbac_enabled
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('template', 'operator/ceph_system_role_binding.yaml') | from_yaml }}"
+
+- name: ROOK - Define RBAC Cluster Role Binding for the operator system namespace
+  when: rook_kubernetes_rbac_enabled
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('template', 'operator/ceph_system_crb.yaml') | from_yaml }}"
+
+# Deployment of the rook operator
+
+- name: ROOK - Create the Rook Operator Deployment on the operator namespace
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('template', 'operator/rook_operator.yaml') | from_yaml }}"
+
+# Verify the deployment is completed
+
+- name: ROOK - Verify if the rook operator is up and running
+  k8s:
+    api_version: apps/v1beta1
+    kind: Deployment
+    name: rook-ceph-operator
+    namespace: "{{ rook_operator_namespace }}"
+  register: deployment_data
+  until: deployment_data.result.status.conditions[0].status == "True"
+  retries: 30
+  delay: 10
+
+- name: ROOK - Verify if the agents are running
+  k8s:
+    api_version: extensions/v1beta1
+    kind: DaemonSet
+    name: rook-ceph-agent
+    namespace: "{{ rook_operator_namespace }}"
+  register: daemonset_data
+  until: daemonset_data.result.status.desiredNumberScheduled == daemonset_data.result.status.numberReady
+  retries: 30
+  delay: 10
