@@ -4,11 +4,13 @@
 # This tasks files is responsible for deploying the rook operator
 # It also includes tasks for initializing other configured components
 
+# TODO: Install pip if required
+
 # Bootstrap a node with openshift dependency if required
 - name: ROOK Bootstrap - Install openshift python library
   pip:
     name: openshift
-    version: 0.4.3
+    version: 0.6.0
   when: rook_bootstrap
 
 # Instantiate the operator on the cluster
