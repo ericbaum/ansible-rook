@@ -10,7 +10,7 @@
 - name: ROOK Bootstrap - Install openshift python library
   pip:
     name: openshift
-    version: 0.6.0
+    version: 0.7.2
   when: rook_bootstrap
 
 # Instantiate the operator on the cluster
