@@ -38,3 +38,6 @@ rook_node_label_all: all
 rook_node_label_mon: mon
 rook_node_label_mgr: mon
 rook_node_label_osd: osd
+
+# Define the filter used to locating the disks that will be associated to OSDs
+rook_osd_device_filter: ""

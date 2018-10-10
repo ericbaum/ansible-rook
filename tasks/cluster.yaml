@@ -32,11 +32,11 @@
 
 - name: ROOK - Verify the cluster deploy is completed
   k8s:
-    api_version: apps/v1beta1
+    api_version: ceph.rook.io/v1beta1
     kind: Cluster
     name: rook-ceph
     namespace: "{{ rook_cluster_namespace }}"
   register: cluster_data
-  until: cluster_data.status.state == "Created"
+  until: cluster_data.result.status and cluster_data.result.status.state == "Created"
   retries: 30
   delay: 15
