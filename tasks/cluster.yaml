@@ -8,32 +8,35 @@
     kind: Namespace
     state: present
 
-- name: ROOK - Define RBAC Service Account for the ceph cluster namespace
+- name: ROOK - Define RBAC for the cluster namespace
   k8s:
     kubeconfig: "{{ kubeconfig_file_path }}"
     state: present
-    definition: "{{ lookup('template', 'cluster/ceph_cluster_sa.yaml') | from_yaml }}"
-
-- name: ROOK - Define RBAC Role for the ceph cluster namespace
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('template', 'cluster/ceph_cluster_role.yaml') | from_yaml }}"
-
-- name: ROOK - Define RBAC Cluster Role Binding for the ceph cluster namespace
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('template', 'cluster/ceph_cluster_crb.yaml') | from_yaml }}"
-
-- name: ROOK - Define RBAC Role Binding for the ceph cluster namespace
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('template', 'cluster/ceph_cluster_role_binding.yaml') | from_yaml }}"
+    definition: "{{ item }}"
+  register: result
+  when: rook_kubernetes_rbac_enabled
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'cluster/ceph_cluster_sa.yaml') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_role.yaml') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_crb.yaml') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_role_binding.yaml') | from_yaml }}"
 
 - name: ROOK - Create the ceph cluster
   k8s:
     kubeconfig: "{{ kubeconfig_file_path }}"
     state: present
     definition: "{{ lookup('template', 'cluster/ceph_cluster.yaml') | from_yaml }}"
+
+- name: ROOK - Verify the cluster deploy is completed
+  k8s:
+    api_version: apps/v1beta1
+    kind: Cluster
+    name: rook-ceph
+    namespace: "{{ rook_cluster_namespace }}"
+  register: cluster_data
+  until: cluster_data.status.state == "Created"
+  retries: 30
+  delay: 15
