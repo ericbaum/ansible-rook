@@ -12,6 +12,7 @@ rules:
   resources:
   - secrets
   - pods
+  - pods/log
   - services
   - configmaps
   verbs:
