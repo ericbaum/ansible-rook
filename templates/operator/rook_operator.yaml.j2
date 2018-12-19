@@ -4,7 +4,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: rook-ceph-operator
-  namespace: "{{ rook_operator_namespace }}"
+  namespace: {{ rook_operator_namespace }}
   labels:
     operator: rook
     storage-backend: ceph
@@ -40,9 +40,21 @@ spec:
         # - name: AGENT_TOLERATION_KEY
         #  value: "<KeyOfTheTaintToTolerate>"
 
+        # (Optional) Rook Agent mount security mode. Can by `Any` or `Restricted`.
+        # `Any` uses Ceph admin credentials by default/fallback.
+        # For using `Restricted` you must have a Ceph secret in each namespace storage should be consumed from and
+        # set `mountUser` to the Ceph user, `mountSecret` to the Kubernetes secret name.
+        # to the namespace in which the `mountSecret` Kubernetes secret namespace.
+        # - name: AGENT_MOUNT_SECURITY_MODE
+        #   value: "Any"
+
         # Set the path where the Rook agent can find the flex volumes
         # - name: FLEXVOLUME_DIR_PATH
         #  value: "<PathToFlexVolumes>"
+
+        # Set the path where kernel modules can be found
+        # - name: LIB_MODULES_DIR_PATH
+        #  value: "<PathToLibModules>"
 
         # Rook Discover toleration. Will tolerate all taints with all keys.
         # Choose between NoSchedule, PreferNoSchedule and NoExecute:
@@ -69,6 +81,11 @@ spec:
         # current mon with a new mon (useful for compensating flapping network).
         - name: ROOK_MON_OUT_TIMEOUT
           value: "{{ rook_mon_timeout }}"
+
+        # The duration between discovering devices in the rook-discover daemonset.
+        - name: ROOK_DISCOVER_DEVICES_INTERVAL
+          value: "60m"
+
         # Whether to start pods as privileged that mount a host path, which includes the Ceph mon and osd pods.
         # This is necessary to workaround the anyuid issues when running on OpenShift.
         # For more details see https://github.com/rook/rook/issues/1314#issuecomment-355799641
