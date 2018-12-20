@@ -1,6 +1,6 @@
 galaxy_info:
   author: Eric Baum
-  description: github.com/ericbaum
+  description: github.com/ericbaum/ansible-rook
   company: CPqD
 
   license: GPLv3
@@ -10,7 +10,7 @@ galaxy_info:
   platforms:
   - name: Kubernetes
     versions:
-     - 1.11.x
+     - 1.12.3
 
   galaxy_tags:
     - rook

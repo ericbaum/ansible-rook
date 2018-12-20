@@ -36,26 +36,13 @@
     state: present
     definition: "{{ lookup('template', 'cluster/ceph_cluster.yaml.j2') | from_yaml }}"
 
-# TODO: Review verification, print result and check where is the error
-
-- name: ROOK - Verify the cluster deploy is started
+- name: ROOK - Verify the cluster deploy is complete
   k8s:
     api_version: ceph.rook.io/v1
     kind: CephCluster
     name: rook-ceph
     namespace: "{{ rook_cluster_namespace }}"
   register: cluster_data
-  until: cluster_data.result.status
-  retries: 30
-  delay: 15
-
-- name: ROOK - Verify the cluster deploy is completed
-  k8s:
-    api_version: ceph.rook.io/v1
-    kind: CephCluster
-    name: rook-ceph
-    namespace: "{{ rook_cluster_namespace }}"
-  register: cluster_data
-  until: cluster_data.result.status.state == "Created"
+  until: cluster_data.result.get('status', {}).get('state') == "Created"
   retries: 30
   delay: 15
