@@ -19,26 +19,43 @@
   retries: 30
   delay: 10
   loop:
-  - "{{ lookup('template', 'cluster/ceph_cluster_sa.yaml') | from_yaml }}"
-  - "{{ lookup('template', 'cluster/ceph_cluster_role.yaml') | from_yaml }}"
-  - "{{ lookup('template', 'cluster/ceph_cluster_crb.yaml') | from_yaml }}"
-  - "{{ lookup('template', 'cluster/ceph_cluster_role_binding.yaml') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_osd_sa.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_mgr_sa.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_osd_role.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_mgr_system_role.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_mgr_role.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_mgmt_role_binding.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_osd_role_binding.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_mgr_role_binding.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_mgr_system_role_binding.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/ceph_cluster_mgr_cluster_role_binding.yaml.j2') | from_yaml }}"
 
 - name: ROOK - Create the ceph cluster
   k8s:
     kubeconfig: "{{ kubeconfig_file_path }}"
     state: present
-    definition: "{{ lookup('template', 'cluster/ceph_cluster.yaml') | from_yaml }}"
+    definition: "{{ lookup('template', 'cluster/ceph_cluster.yaml.j2') | from_yaml }}"
 
 # TODO: Review verification, print result and check where is the error
 
-- name: ROOK - Verify the cluster deploy is completed
+- name: ROOK - Verify the cluster deploy is started
   k8s:
-    api_version: ceph.rook.io/v1beta1
-    kind: Cluster
+    api_version: ceph.rook.io/v1
+    kind: CephCluster
     name: rook-ceph
     namespace: "{{ rook_cluster_namespace }}"
   register: cluster_data
-  until: cluster_data.result.status and cluster_data.result.status.state == "Created"
+  until: cluster_data.result.status
+  retries: 30
+  delay: 15
+
+- name: ROOK - Verify the cluster deploy is completed
+  k8s:
+    api_version: ceph.rook.io/v1
+    kind: CephCluster
+    name: rook-ceph
+    namespace: "{{ rook_cluster_namespace }}"
+  register: cluster_data
+  until: cluster_data.result.status.state == "Created"
   retries: 30
   delay: 15

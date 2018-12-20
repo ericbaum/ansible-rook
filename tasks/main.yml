@@ -27,7 +27,7 @@
 - include_tasks: operator.yaml
 
 # Create a ceph cluster
-# - include_tasks: cluster.yaml
+- include_tasks: cluster.yaml
 
 # TODO: Create a pool and a storageclass
 # TODO: Install other rook components as required
