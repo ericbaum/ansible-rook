@@ -43,6 +43,6 @@ GPLv3
 Author Information
 ------------------
 
-Eric Baum, 2018 
+Eric Baum, 2018
 
 https://github.com/ericbaum

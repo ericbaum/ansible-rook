@@ -3,7 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
   name: rook-ceph-system
-  namespace: "{{ rook_operator_namespace }}"
+  namespace: {{ rook_operator_namespace }}
   labels:
     operator: rook
     storage-backend: ceph

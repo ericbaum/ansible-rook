@@ -4,7 +4,7 @@
 kubeconfig_file_path:
 rook_bootstrap: true
 
-rook_version: master
+rook_version: v0.9.0
 
 # Name of the namespaces for the operator and for the cluster
 rook_operator_namespace: rook-ceph-system
@@ -38,3 +38,6 @@ rook_node_label_all: all
 rook_node_label_mon: mon
 rook_node_label_mgr: mon
 rook_node_label_osd: osd
+
+# Define the filter used to locating the disks that will be associated to OSDs
+rook_osd_device_filter: ""

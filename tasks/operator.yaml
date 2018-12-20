@@ -10,78 +10,43 @@
 
 # Define rook custom resources
 
-- name: ROOK - Define Cluster CustomResource
+- name: ROOK - Define CustomResources
   k8s:
     kubeconfig: "{{ kubeconfig_file_path }}"
     state: present
-    definition: "{{ lookup('file', 'operator/cluster_crd.yaml') | from_yaml }}"
-
-- name: ROOK - Define Filesystem CustomResource
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('file', 'operator/filesystem_crd.yaml') | from_yaml }}"
-
-- name: ROOK - Define ObjectStore CustomResource
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('file', 'operator/object_store_crd.yaml') | from_yaml }}"
-
-- name: ROOK - Define Pool CustomResource
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('file', 'operator/pool_crd.yaml') | from_yaml }}"
-
-- name: ROOK - Define Volume CustomResource
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('file', 'operator/volume_crd.yaml') | from_yaml }}"
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+    - "{{ lookup('file', 'operator/cluster_crd.yaml') | from_yaml }}"
+    - "{{ lookup('file', 'operator/filesystem_crd.yaml') | from_yaml }}"
+    - "{{ lookup('file', 'operator/object_store_crd.yaml') | from_yaml }}"
+    - "{{ lookup('file', 'operator/object_store_users_crd.yaml') | from_yaml }}"
+    - "{{ lookup('file', 'operator/block_pool_crd.yaml') | from_yaml }}"
+    - "{{ lookup('file', 'operator/volume_crd.yaml') | from_yaml }}"
 
 # Define RBAC roles
 
-- name: ROOK - Define RBAC Cluster Role for Cluster Mgmt
+- name: ROOK - Define RBAC for the operator
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
   when: rook_kubernetes_rbac_enabled
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('file', 'operator/cluster_mgmt_rbac_cr.yaml') | from_yaml }}"
-
-- name: ROOK - Define RBAC Role for the operator system namespace
-  when: rook_kubernetes_rbac_enabled
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('template', 'operator/ceph_system_role.yaml') | from_yaml }}"
-
-- name: ROOK - Define RBAC Cluster Role for managing the Rook CRDs
-  when: rook_kubernetes_rbac_enabled
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('file', 'operator/rook_global_rbac_cr.yaml') | from_yaml }}"
-
-- name: ROOK - Define RBAC Service Account for the operator system namespace
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('template', 'operator/ceph_system_sa.yaml') | from_yaml }}"
-
-- name: ROOK - Define RBAC Role Binding for the operator system namespace
-  when: rook_kubernetes_rbac_enabled
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('template', 'operator/ceph_system_role_binding.yaml') | from_yaml }}"
-
-- name: ROOK - Define RBAC Cluster Role Binding for the operator system namespace
-  when: rook_kubernetes_rbac_enabled
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
-    state: present
-    definition: "{{ lookup('template', 'operator/ceph_system_crb.yaml') | from_yaml }}"
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('file', 'operator/cluster_mgmt_rbac_cr.yaml') | from_yaml }}"
+  - "{{ lookup('template', 'operator/ceph_system_role.yaml.j2') | from_yaml }}"
+  - "{{ lookup('file', 'operator/rook_global_rbac_cr.yaml') | from_yaml }}"
+  - "{{ lookup('file', 'operator/rook_ceph_mgr_rbac_cr.yaml') | from_yaml }}"
+  - "{{ lookup('template', 'operator/ceph_system_sa.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'operator/ceph_system_role_binding.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'operator/ceph_system_crb.yaml.j2') | from_yaml }}"
 
 # Deployment of the rook operator
 
@@ -89,7 +54,7 @@
   k8s:
     kubeconfig: "{{ kubeconfig_file_path }}"
     state: present
-    definition: "{{ lookup('template', 'operator/rook_operator.yaml') | from_yaml }}"
+    definition: "{{ lookup('template', 'operator/rook_operator.yaml.j2') | from_yaml }}"
 
 # Verify the deployment is completed
 
