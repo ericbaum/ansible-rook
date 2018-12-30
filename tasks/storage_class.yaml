@@ -1,0 +1,13 @@
+# Create storage classes as defined on variables
+
+- name: ROOK - Create K8s Storage Classes
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('template', 'storages/storage_class.yaml.j2') | from_yaml }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop: "{{ rook_storage_classes }}"
+  

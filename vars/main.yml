@@ -3,6 +3,14 @@
 
 # This variable defines a list of storage pools that will be created
 # The expected format for the content of this variable is a list:
+
 # ceph_block_storage_pools:
 #   - pool_name: pool_name
 #     pool_replicas: 2
+
+# This variable defines a list of storage clases that will be created on the k8s cluster
+# The expected format can be found below:
+
+# rook_storage_classes:
+#   - name: class_name
+#     block_pool_name: block_pool_name
