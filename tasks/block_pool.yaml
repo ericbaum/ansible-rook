@@ -1,0 +1,12 @@
+# Create block pools as defined on variables
+
+- name: ROOK - Create Block Storage pools
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path }}"
+    state: present
+    definition: "{{ lookup('template', 'storages/ceph_block_pool.yaml.j2') | from_yaml }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop: "{{ ceph_block_storage_pools }}"

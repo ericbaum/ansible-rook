@@ -1,2 +1,8 @@
 ---
 # vars file for ansible-rook
+
+# This variable defines a list of storage pools that will be created
+# The expected format for the content of this variable is a list:
+# ceph_block_storage_pools:
+#   - pool_name: pool_name
+#     pool_replicas: 2

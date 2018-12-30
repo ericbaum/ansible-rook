@@ -27,7 +27,11 @@
 - include_tasks: operator.yaml
 
 # Create a ceph cluster
+# This manifest is only capable of deploying a single cluster at the moment
 - include_tasks: cluster.yaml
+
+# Create all the define block pools
+- include_tasks: block_pool.yaml
 
 # TODO: Create a pool and a storageclass
 # TODO: Install other rook components as required
