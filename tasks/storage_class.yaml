@@ -2,7 +2,7 @@
 
 - name: ROOK - Create K8s Storage Classes
   k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ lookup('template', 'storages/storage_class.yaml.j2') | from_yaml }}"
   register: result

@@ -2,7 +2,7 @@
 
 - name: ROOK - Create Block Storage pools
   k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ lookup('template', 'storages/ceph_block_pool.yaml.j2') | from_yaml }}"
   register: result

@@ -3,7 +3,7 @@
 - name: ROOK - Create operator namespace
   k8s:
     name: "{{ rook_operator_namespace }}"
-    kubeconfig: "{{ kubeconfig_file_path }}"
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     api_version: v1
     kind: Namespace
     state: present
@@ -12,7 +12,7 @@
 
 - name: ROOK - Define CustomResources
   k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ item }}"
   register: result
@@ -31,7 +31,7 @@
 
 - name: ROOK - Define RBAC for the operator
   k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ item }}"
   register: result
@@ -52,7 +52,7 @@
 
 - name: ROOK - Create the Rook Operator Deployment on the operator namespace
   k8s:
-    kubeconfig: "{{ kubeconfig_file_path }}"
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ lookup('template', 'operator/rook_operator.yaml.j2') | from_yaml }}"
 
@@ -60,6 +60,7 @@
 
 - name: ROOK - Verify if the rook operator is up and running
   k8s:
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     api_version: apps/v1beta1
     kind: Deployment
     name: rook-ceph-operator
@@ -71,6 +72,7 @@
 
 - name: ROOK - Verify if the agents are running
   k8s:
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     api_version: extensions/v1beta1
     kind: DaemonSet
     name: rook-ceph-agent
