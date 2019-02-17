@@ -10,4 +10,4 @@
   retries: 30
   delay: 10
   loop: "{{ rook_storage_classes }}"
-  
+  tags: storage_creation

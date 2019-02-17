@@ -3,7 +3,7 @@
 
 rook_bootstrap: true
 
-rook_version: v0.9.0
+rook_version: v0.9.2
 
 # Name of the namespaces for the operator and for the cluster
 rook_operator_namespace: rook-ceph-system
@@ -35,8 +35,15 @@ rook_node_label_key: ceph-role
 # The value used for each type of service is set below:
 rook_node_label_all: all
 rook_node_label_mon: mon
-rook_node_label_mgr: mon
+rook_node_label_mgr: mgr
 rook_node_label_osd: osd
 
 # Define the filter used to locating the disks that will be associated to OSDs
 rook_osd_device_filter: ""
+
+# [Optional] Specify one directory to store data (cluster level), in place of, or in addition to - block devices.
+# More paths can be specified in the cluster configuration, but for now, only one should suffice, as it is not recommended to use 2 ore more dirs on the same physical device
+# Note, as per docs https://github.com/rook/rook/blob/master/Documentation/ceph-cluster-crd.md#osd-configuration-settings, bluestore is not recommended for directories, so using erausre codes is not a viable option
+#rook_storage_dir: "/rook-storage"
+
+ceph_version: v13.2.4-20190109

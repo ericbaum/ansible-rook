@@ -19,8 +19,7 @@
 # Bootstrap a node with openshift dependency if required
 - name: ROOK Bootstrap - Install openshift python library
   pip:
-    name: openshift
-    version: 0.7.2
+    name: openshift>=0.7.2
   when: rook_bootstrap
 
 # Instantiate the operator on the cluster
@@ -32,8 +31,10 @@
 
 # Create all the define block pools
 - include_tasks: block_pool.yaml
+  tags: storage_creation
 
 # Create a Kubernetes Storage Class
 - include_tasks: storage_class.yaml
+  tags: storage_creation
 
 # TODO: Install other rook components as required
