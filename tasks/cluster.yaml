@@ -29,6 +29,7 @@
   - "{{ lookup('template', 'cluster/ceph_cluster_mgr_role_binding.yaml.j2') | from_yaml }}"
   - "{{ lookup('template', 'cluster/ceph_cluster_mgr_system_role_binding.yaml.j2') | from_yaml }}"
   - "{{ lookup('template', 'cluster/ceph_cluster_mgr_cluster_role_binding.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'cluster/toolbox.yaml.j2') | from_yaml }}"
 
 - name: ROOK - Create the ceph cluster
   k8s:
