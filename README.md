@@ -42,7 +42,7 @@ Example Playbook
       roles:
          - { role: ansible-rook, rook_storage_dir: '/rook-storage', rook_mon_count: 3 }
     ```
-- A more detail playbook:
+- A more detailed playbook:
     ```
     - hosts: kubernetes-master-node
 
