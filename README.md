@@ -63,11 +63,18 @@ Example Playbook
       # Define a storage pool and a storage class
       vars:
         ceph_block_storage_pools:
-          - pool_name: replicated-pool
-            pool_replicas: 3
+        - pool_name: replicated-pool
+          pool_replicas: 3
         rook_storage_classes:
-          - name: rook-storage-class
-            block_pool_name: replicated-pool
+        - name: rook-storage-class
+          block_pool_name: replicated-pool
+        # Alternatively, shared filesystems can be defined:
+        ceph_filesystems:
+        - name: ceph_filesystem_name
+          pool_replicas:
+            metadata: 3
+            data: 3
+          metadata_active: 1
 
       roles:
         - role: ansible-rook

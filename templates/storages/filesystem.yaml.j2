@@ -1,0 +1,16 @@
+# https://rook.github.io/docs/rook/v0.9/ceph-filesystem.html
+apiVersion: ceph.rook.io/v1
+kind: CephFilesystem
+metadata:
+  name: {{ item.name }}
+  namespace: {{ rook_cluster_namespace }}
+spec:
+  metadataPool:
+    replicated:
+      size: {{ item.pool_replicas.metadata }}
+  dataPools:
+    - replicated:
+        size: {{ item.pool_replicas.data }}
+  metadataServer:
+    activeCount: {{ item.metadata_active }}
+    activeStandby: true

@@ -14,3 +14,12 @@
 # rook_storage_classes:
 #   - name: class_name
 #     block_pool_name: block_pool_name
+
+
+## This defines a list of shared ceph filesystems (do not use underscores in name)
+# ceph_filesystems:
+#   - name: ceph-filesystem-name
+#     pool_replicas:
+#       metadata: 3
+#       data: 3
+#     metadata_active: 1
