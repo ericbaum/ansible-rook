@@ -1,0 +1,13 @@
+# Create storage classes as defined on variables
+
+- name: ROOK - Create Rook Shared Filesystem
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ lookup('template', 'storages/filesystem.yaml.j2') | from_yaml }}"
+  register: result
+  until: result.failed == 0
+  retries: 10
+  delay: 10
+  loop: "{{ ceph_filesystems }}"
+  tags: storage_creation
