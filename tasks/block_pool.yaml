@@ -7,7 +7,7 @@
     definition: "{{ lookup('template', 'storages/ceph_block_pool.yaml.j2') | from_yaml }}"
   register: result
   until: result.failed == 0 or result.status != 200
-  retries: 30
-  delay: 10
+  retries: "{{ k8s_task_retries | default(3) }}"
+  delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ ceph_block_storage_pools }}"
   tags: storage_creation

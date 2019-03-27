@@ -15,9 +15,9 @@
     definition: "{{ item }}"
   register: result
   when: rook_kubernetes_rbac_enabled
-  until: result.failed == 0
-  retries: 30
-  delay: 10
+  until: result.failed == 0 or result.status != 200
+  retries: "{{ k8s_task_retries | default(3) }}"
+  delay: "{{ k8s_task_delay | default(15) }}"
   loop:
   - "{{ lookup('template', 'cluster/ceph_osd_sa.yaml.j2') | from_yaml }}"
   - "{{ lookup('template', 'cluster/ceph_mgr_sa.yaml.j2') | from_yaml }}"
@@ -46,5 +46,5 @@
     namespace: "{{ rook_cluster_namespace }}"
   register: cluster_data
   until: cluster_data.result.get('status', {}).get('state') == "Created"
-  retries: 30
-  delay: 15
+  retries: "{{ k8s_task_retries | default(3) }}"
+  delay: "{{ k8s_task_delay | default(15) }}"
