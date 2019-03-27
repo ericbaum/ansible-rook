@@ -35,9 +35,9 @@ Example Playbook
     - hosts: kubernetes-master-node
       roles:
          - { role: ansible-rook, rook_osd_device_filter: sdb, rook_mon_count: 1 }
-    ```yaml
-- Using a directory:
     ```
+- Using a directory:
+    ```yaml
     - hosts: kubernetes-master-node
       roles:
          - { role: ansible-rook, rook_storage_dir: '/rook-storage', rook_mon_count: 3 }
