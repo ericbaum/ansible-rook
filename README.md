@@ -46,7 +46,7 @@ Example Playbook
     ```
     - hosts: kubernetes-master-node
 
-      tasks:
+      pre_tasks:
       - name: Get Kubernetes Nodes
         k8s_facts:
           kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
