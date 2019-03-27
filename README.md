@@ -14,7 +14,7 @@ This role uses the k8s module which depends on Openshift:
 * openshift >= 0.7.2
 * PyYAML >= 3.11
 
-This role is actually capable of deploying Rook version 0.8.3
+This role is actually capable of deploying Rook version 0.9.3
 
 Role Variables
 --------------
@@ -31,11 +31,11 @@ This role has no depencies
 Example Playbook
 ----------------
 - Using block devices:
-    ```
+    ```yaml
     - hosts: kubernetes-master-node
       roles:
          - { role: ansible-rook, rook_osd_device_filter: sdb, rook_mon_count: 1 }
-    ```
+    ```yaml
 - Using a directory:
     ```
     - hosts: kubernetes-master-node
@@ -43,7 +43,7 @@ Example Playbook
          - { role: ansible-rook, rook_storage_dir: '/rook-storage', rook_mon_count: 3 }
     ```
 - A more detailed playbook:
-    ```
+    ```yaml
     - hosts: kubernetes-master-node
 
       pre_tasks:
