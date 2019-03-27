@@ -6,7 +6,7 @@ metadata:
   namespace: {{ rook_operator_namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: rook-ceph-mgr-system
 subjects:
 - kind: ServiceAccount
