@@ -76,11 +76,27 @@ Example Playbook
         register: label_return
         loop: "{{ kubernetes_nodes.resources }}"
 
+      # Define a storage pool and a storage class
+      vars:
+        ceph_block_storage_pools:
+        - pool_name: replicated-pool
+          pool_replicas: 3
+        rook_storage_classes:
+        - name: rook-storage-class
+          block_pool_name: replicated-pool
+        # Alternatively, shared filesystems can be defined:
+        ceph_filesystems:
+        - name: ceph_filesystem_name
+          pool_replicas:
+            metadata: 3
+            data: 3
+          metadata_active: 1
+
       roles:
         - role: ansible-rook
           rook_osd_device_filter: ''
-          rook_storage_dir: "{{ rook_storage_dir }}"
-          rook_mon_count: "{{ rook_mon_count | default(1) }}"
+          rook_storage_dir: '/rook-storage'
+          rook_mon_count: 1
 
 
     - hosts: nodes
