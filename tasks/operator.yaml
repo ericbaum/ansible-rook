@@ -1,16 +1,6 @@
 # Initialize rook operator
 
-- name: ROOK - Create operator namespace
-  k8s:
-    name: "{{ rook_operator_namespace }}"
-    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
-    api_version: v1
-    kind: Namespace
-    state: present
-
-# Define rook custom resources
-
-- name: ROOK - Define CustomResources
+- name: ROOK - Deploy Rook Operator
   k8s:
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
@@ -19,42 +9,7 @@
   until: result.failed == 0 or result.status != 200
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
-  loop:
-    - "{{ lookup('file', 'operator/cluster_crd.yaml') | from_yaml }}"
-    - "{{ lookup('file', 'operator/filesystem_crd.yaml') | from_yaml }}"
-    - "{{ lookup('file', 'operator/object_store_crd.yaml') | from_yaml }}"
-    - "{{ lookup('file', 'operator/object_store_users_crd.yaml') | from_yaml }}"
-    - "{{ lookup('file', 'operator/block_pool_crd.yaml') | from_yaml }}"
-    - "{{ lookup('file', 'operator/volume_crd.yaml') | from_yaml }}"
-
-# Define RBAC roles
-
-- name: ROOK - Define RBAC for the operator
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
-    state: present
-    definition: "{{ item }}"
-  register: result
-  when: rook_kubernetes_rbac_enabled
-  until: result.failed == 0 or result.status != 200
-  retries: "{{ k8s_task_retries | default(3) }}"
-  delay: "{{ k8s_task_delay | default(15) }}"
-  loop:
-  - "{{ lookup('file', 'operator/cluster_mgmt_rbac_cr.yaml') | from_yaml }}"
-  - "{{ lookup('template', 'operator/ceph_system_role.yaml.j2') | from_yaml }}"
-  - "{{ lookup('file', 'operator/rook_global_rbac_cr.yaml') | from_yaml }}"
-  - "{{ lookup('file', 'operator/rook_ceph_mgr_rbac_cr.yaml') | from_yaml }}"
-  - "{{ lookup('template', 'operator/ceph_system_sa.yaml.j2') | from_yaml }}"
-  - "{{ lookup('template', 'operator/ceph_system_role_binding.yaml.j2') | from_yaml }}"
-  - "{{ lookup('template', 'operator/ceph_system_crb.yaml.j2') | from_yaml }}"
-
-# Deployment of the rook operator
-
-- name: ROOK - Create the Rook Operator Deployment on the operator namespace
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
-    state: present
-    definition: "{{ lookup('template', 'operator/rook_operator.yaml.j2') | from_yaml }}"
+  loop: "{{ lookup('template', 'operator.yaml.j2') | from_yaml_all | list }}"
 
 # Verify the deployment is completed
 
