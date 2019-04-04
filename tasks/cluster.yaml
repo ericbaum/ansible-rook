@@ -1,13 +1,5 @@
 # Deploy Ceph Cluster
 
-- name: ROOK - Create ceph cluster namespace
-  k8s:
-    name: "{{ rook_cluster_namespace }}"
-    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
-    api_version: v1
-    kind: Namespace
-    state: present
-
 - name: ROOK - Define RBAC and Create the ceph cluster
   k8s:
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
