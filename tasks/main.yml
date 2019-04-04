@@ -24,23 +24,25 @@
 
 # Instantiate the operator on the cluster
 - include_tasks: operator.yaml
+  tags: deploy_operator
 
 # Create a ceph cluster
 # This manifest is only capable of deploying a single cluster at the moment
-- include_tasks: cluster.yaml
+- import_tasks: cluster.yaml
+  tags: deploy_cluster
 
 # Create all the define block pools
-- include_tasks: block_pool.yaml
+- import_tasks: block_pool.yaml
   tags: storage_creation
   when: ceph_block_storage_pools is defined
 
 # Create a Kubernetes Storage Class
-- include_tasks: storage_class.yaml
+- import_tasks: storage_class.yaml
   tags: storage_creation
   when: rook_storage_classes is defined
 
 # Create Ceph filesystems
-- include_tasks: filesystem.yaml
+- import_tasks: filesystem.yaml
   tags: storage_creation
   when: ceph_filesystems is defined
 
