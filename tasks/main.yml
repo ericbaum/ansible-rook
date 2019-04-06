@@ -22,6 +22,10 @@
     name: openshift>=0.7.2
   when: rook_bootstrap
 
+# Create the common resources necessary to start the operator and the ceph cluster
+- include_tasks: common.yaml
+  tags: create_common
+
 # Instantiate the operator on the cluster
 - include_tasks: operator.yaml
   tags: deploy_operator

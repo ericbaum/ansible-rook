@@ -1,0 +1,12 @@
+# Create the common resources
+
+- name: ROOK - Create CRDs and Define RBAC
+  k8s:
+    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0 or result.status != 200
+  retries: "{{ k8s_task_retries | default(3) }}"
+  delay: "{{ k8s_task_delay | default(15) }}"
+  loop: "{{ lookup('template', 'common.yaml.j2') | from_yaml_all | list }}"

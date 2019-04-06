@@ -6,7 +6,7 @@ rook_bootstrap: true
 rook_version: v0.9.3
 
 # Name of the namespaces for the operator and for the cluster
-rook_operator_namespace: rook-ceph-system
+rook_operator_namespace: rook-ceph
 rook_cluster_namespace: rook-ceph
 
 # RBAC is enabled on kubernetes
@@ -19,7 +19,7 @@ rook_log_level: INFO
 rook_mon_count: 3
 rook_mon_multiple_per_node: false
 rook_mon_healthcheck: 45s
-rook_mon_timeout: 300s
+rook_mon_timeout: 60s
 
 # Enable ceph dashboard
 rook_dashboard_enabled: true
@@ -46,7 +46,7 @@ rook_osd_device_filter: ""
 # Note, as per docs https://github.com/rook/rook/blob/master/Documentation/ceph-cluster-crd.md#osd-configuration-settings, bluestore is not recommended for directories, so using erausre codes is not a viable option
 #rook_storage_dir: "/rook-storage"
 
-ceph_version: v13.2.5-20190319
+ceph_version: v13.2
 
 k8s_task_retries: 5
 k8s_task_delay: 15
