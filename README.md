@@ -58,6 +58,11 @@ Example Playbook
           mode: "{{ rook_storage_dir_permissions | default('0755') }}"
         loop: "{{ [ rook_storage_dir | default('') ] + [ rook_data_host_path | default('') ] }}"
         when: item | length
+      - name: Install requirements
+        pip:
+          extra_args: -U
+          name: "{{ item }}"
+        loop: "{{ lookup('file', 'ansible-rook/requirements.txt').splitlines() }}"
 
 
     - hosts: kubernetes-master-node
