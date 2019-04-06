@@ -24,7 +24,7 @@
 
 # Create the common resources necessary to start the operator and the ceph cluster
 - include_tasks: common.yaml
-  tags: create_common
+  tags: deploy_common
 
 # Instantiate the operator on the cluster
 - include_tasks: operator.yaml
