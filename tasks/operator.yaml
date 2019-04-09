@@ -6,7 +6,7 @@
     state: present
     definition: "{{ item }}"
   register: result
-  until: result.failed == 0 or result.rc !=0 or result.status != 200
+  until: result.failed == 0 or (result.rc is defined and result.rc !=0) or result.status != 200
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ lookup('template', 'operator.yaml.j2') | from_yaml_all | list }}"
@@ -33,6 +33,6 @@
     name: rook-ceph-agent
     namespace: "{{ rook_operator_namespace }}"
   register: daemonset_data
-  until: daemonset_data.result.status.desiredNumberScheduled == daemonset_data.result.status.numberReady
+  until: daemonset_data.failed == 0 or (daemonset_data.rc is defined and daemonset_data.rc !=0) or daemonset_data.status != 200 or (daemonset_data.result is defined and daemonset_data.result.status.desiredNumberScheduled == daemonset_data.result.status.numberReady)
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
