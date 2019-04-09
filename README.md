@@ -14,7 +14,7 @@ This role uses the k8s module which depends on Openshift:
 * openshift >= 0.7.2
 * PyYAML >= 3.11
 
-This role is actually capable of deploying Rook version 0.9.3
+This role is actually capable of deploying Rook version: master
 
 Role Variables
 --------------
