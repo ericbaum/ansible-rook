@@ -88,6 +88,9 @@ spec:
         # The logging level for the operator: INFO | DEBUG
         - name: ROOK_LOG_LEVEL
           value: "{{ rook_log_level }}"
+        # The interval to check the health of the ceph cluster and update the status in the custom resource.
+        - name: ROOK_CEPH_STATUS_CHECK_INTERVAL
+          value: "{{ rook_ceph_status_check }}"
         # The interval to check if every mon is in the quorum.
         - name: ROOK_MON_HEALTHCHECK_INTERVAL
           value: "{{ rook_mon_healthcheck }}"
@@ -112,6 +115,9 @@ spec:
         # For more details see https://github.com/rook/rook/issues/2254
         - name: ROOK_ENABLE_FSGROUP
           value: "true"
+        # Disable automatic orchestration when new devices are discovered
+        - name: ROOK_DISABLE_DEVICE_HOTPLUG
+          value: "{{ rook_disable_device_hotplug }}"
         # The name of the node to pass with the downward API
         - name: NODE_NAME
           valueFrom:

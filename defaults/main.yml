@@ -16,6 +16,7 @@ rook_kubernetes_rbac_enabled: true
 rook_log_level: INFO
 
 # Monitors configurations
+rook_ceph_status_check: 60s
 rook_mon_count: 3
 rook_mon_multiple_per_node: false
 rook_mon_healthcheck: 45s
@@ -41,12 +42,15 @@ rook_node_label_osd: osd
 # Define the filter used to locating the disks that will be associated to OSDs
 rook_osd_device_filter: ""
 
+# Disable automatic orchestration when new devices are discovered
+rook_disable_device_hotplug: false
+
 # [Optional] Specify one directory to store data (cluster level), in place of, or in addition to - block devices.
 # More paths can be specified in the cluster configuration, but for now, only one should suffice, as it is not recommended to use 2 ore more dirs on the same physical device
 # Note, as per docs https://github.com/rook/rook/blob/master/Documentation/ceph-cluster-crd.md#osd-configuration-settings, bluestore is not recommended for directories, so using erausre codes is not a viable option
 #rook_storage_dir: "/rook-storage"
 
-ceph_version: v13.2
+ceph_version: v14.2
 
 k8s_task_retries: 5
 k8s_task_delay: 15
