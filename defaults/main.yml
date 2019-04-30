@@ -53,4 +53,4 @@ rook_disable_device_hotplug: false
 ceph_version: v14.2
 
 k8s_task_retries: 5
-k8s_task_delay: 15
+k8s_task_delay: 20
