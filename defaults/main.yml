@@ -3,7 +3,7 @@
 
 rook_bootstrap: true
 
-rook_version: v1.0.1
+rook_version: v1.0.2
 
 # Name of the namespaces for the operator and for the cluster
 rook_operator_namespace: rook-ceph
