@@ -56,6 +56,8 @@ Example Playbook
           state: directory
           recurse: yes
           mode: "{{ rook_storage_dir_permissions | default('0755') }}"
+          owner: "{{ rook_storage_dir_owner | default('0') }}"
+          group: "{{ rook_storage_dir_group | default('0') }}"
         loop: "{{ [ rook_storage_dir | default('') ] + [ rook_data_host_path | default('') ] }}"
         when: item | length
       - name: Install requirements
