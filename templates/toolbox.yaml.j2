@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rook-ceph-tools
-  namespace: {{ rook_cluster_namespace }}
+  namespace: {{ rook_operator_namespace }}
   labels:
     app: rook-ceph-tools
 spec:
