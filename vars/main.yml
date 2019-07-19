@@ -23,3 +23,7 @@
 #       metadata: 3
 #       data: 3
 #     metadata_active: 1
+#     ## Optional to deploy ceph-mount pod to mount this filesystem on the host as well
+#     host_mount: true
+#     ## Optional for the ceph-mount pods, that mount this whole filesystem on the host
+#     host_mount_path: /mnt
