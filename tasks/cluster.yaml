@@ -16,6 +16,7 @@
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ lookup('template', 'toolbox.yaml.j2') | from_yaml }}"
+    force: yes
   register: result
   until: result.failed == 0 or (result.rc is defined and result.rc !=0) or (result.status is defined and result.status != 200)
   retries: "{{ k8s_task_retries | default(3) }}"
