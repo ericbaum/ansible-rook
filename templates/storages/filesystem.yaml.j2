@@ -12,5 +12,5 @@ spec:
     - replicated:
         size: {{ item.pool_replicas.data }}
   metadataServer:
-    activeCount: {{ item.metadata_active }}
-    activeStandby: true
+    activeCount: {{ item.metadata_active | default(1) }}
+    activeStandby: {{ item.metadata_active_standby | default(true) }}
