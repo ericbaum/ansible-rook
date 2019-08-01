@@ -5,8 +5,8 @@
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ item }}"
-  register: result
-  until: result.failed == 0 or (result.rc is defined and result.rc !=0) or (result.status is defined and result.status != 200)
+  register: ret
+  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ lookup('template', 'cluster.yaml.j2') | from_yaml_all | list }}"
@@ -17,8 +17,8 @@
     state: present
     definition: "{{ lookup('template', 'toolbox.yaml.j2') | from_yaml }}"
     force: yes
-  register: result
-  until: result.failed == 0 or (result.rc is defined and result.rc !=0) or (result.status is defined and result.status != 200)
+  register: ret
+  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
 
@@ -30,7 +30,7 @@
     name: rook-ceph
     namespace: "{{ rook_cluster_namespace }}"
   register: cluster_data
-  until: cluster_data.result.get('status', {}).get('state') == "Created"
+  until: cluster_data.get('result', {}).get('status', {}).get('state') == "Created"
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   ignore_errors: yes
