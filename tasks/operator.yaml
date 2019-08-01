@@ -5,8 +5,8 @@
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ item }}"
-  register: result
-  until: result.failed == 0 or (result.rc is defined and result.rc !=0) or (result.status is defined and result.status != 200)
+  register: ret
+  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ lookup('template', 'operator.yaml.j2') | from_yaml_all | list }}"
@@ -20,8 +20,8 @@
     kind: Deployment
     name: rook-ceph-operator
     namespace: "{{ rook_operator_namespace }}"
-  register: deployment_data
-  until: deployment_data.result.status.conditions[0].status == "True"
+  register: ret
+  until: ret.get('result', {}).get('status', {}).get('conditions', [])[0].get('status') == "True"
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
 
@@ -32,7 +32,7 @@
     kind: DaemonSet
     name: rook-ceph-agent
     namespace: "{{ rook_operator_namespace }}"
-  register: daemonset_data
-  until: daemonset_data.failed == 0 or (daemonset_data.rc is defined and daemonset_data.rc !=0) or daemonset_data.status != 200 or (daemonset_data.result is defined and daemonset_data.result.status.desiredNumberScheduled == daemonset_data.result.status.numberReady)
+  register: ret
+  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200 or (ret.get('result', {}).get('status', {}).get('desiredNumberScheduled') == ret.get('result', {}).get('status', {}).get('numberReady')
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
