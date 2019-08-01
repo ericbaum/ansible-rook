@@ -91,6 +91,7 @@ Example Playbook
         ## Optionally, define storage classses
         ## Currently, storage_class_provisioner supports: 'block' and 'filesystem'
         ## https://github.com/rook/rook/blob/master/design/dynamic-provision-filesystem.md
+        ## For filesystem, at the moment, a PersistentVolume has to be manually created: https://github.com/rook/rook/issues/1125#issuecomment-469488011
         rook_storage_classes:
         - name: rook-storage-class-block
           block_pool_name: replicated-pool
