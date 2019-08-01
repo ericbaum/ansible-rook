@@ -5,9 +5,11 @@
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
     definition: "{{ lookup('template', 'storages/storage_class.yaml.j2') | from_yaml }}"
-  register: result
-  until: result.failed == 0 or (result.rc is defined and result.rc !=0) or (result.status is defined and result.status != 200)
+  register: ret
+  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ rook_storage_classes }}"
-  tags: storage_creation
+  tags:
+  - storage_creation
+  - class_creation

@@ -2,13 +2,18 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
    name: {{ item.name }}
-provisioner: ceph.rook.io/block
+provisioner: ceph.rook.io/{{ item.storage_class_provisioner }}
 parameters:
+{% if item.storage_class_provisioner == 'block' %}
   blockPool: {{ item.block_pool_name }}
+  # Specify the filesystem type of the volume. If not specified, it will use `ext4`.
+  fstype: {{ item.fstype | default('xfs') }}
+{% endif %}
+{% if item.storage_class_provisioner == 'filesystem' %}
+  fsName: {{ item.file_system_name }}
+{% endif %}
   # The value of "clusterNamespace" MUST be the same as the one in which your rook cluster exist
   clusterNamespace: {{ rook_cluster_namespace }}
-  # Specify the filesystem type of the volume. If not specified, it will use `ext4`.
-  fstype: xfs
   # (Optional) Specify an existing Ceph user that will be used for mounting storage with this StorageClass.
   #mountUser: user1
   # (Optional) Specify an existing Kubernetes secret name containing just one key holding the Ceph user secret.
