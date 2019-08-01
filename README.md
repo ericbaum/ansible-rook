@@ -83,15 +83,22 @@ Example Playbook
         register: label_return
         loop: "{{ kubernetes_nodes.resources }}"
 
-      # Define a storage pool and a storage class
       vars:
+        ## Define a storage pool
         ceph_block_storage_pools:
         - pool_name: replicated-pool
           pool_replicas: 3
+        ## Optionally, define storage classses
+        ## Currently, storage_class_provisioner supports: 'block' and 'filesystem'
+        ## https://github.com/rook/rook/blob/master/design/dynamic-provision-filesystem.md
         rook_storage_classes:
-        - name: rook-storage-class
+        - name: rook-storage-class-block
           block_pool_name: replicated-pool
-        # Alternatively, shared filesystems can be defined:
+          storage_class_provisioner: block
+        - name: rook-storage-class-filesystem
+          file_system_name: ceph_filesystem_name
+          storage_class_provisioner: filesystem
+        ## Alternatively, shared filesystems can be defined:
         ceph_filesystems:
         - name: ceph_filesystem_name
           pool_replicas:
