@@ -132,6 +132,10 @@ Example Playbook
 > Note: nodes must be labeled beforehand with `ceph-role=all` or either **mon** or **mgr** or **osd**.
 > See `defaults/main.yml`
 
+Rook Ceph project examples
+-------
+https://github.com/rook/rook/tree/master/cluster/examples/kubernetes/ceph
+
 License
 -------
 
