@@ -20,9 +20,14 @@
 ## This defines a list of shared ceph filesystems (do not use underscores in name)
 # ceph_filesystems:
 #   - name: ceph-filesystem-name
+#     ## use either pool_replicas...
 #     pool_replicas:
 #       metadata: 3
 #       data: 3
+#     ## ... or erasureCoded
+#     erasureCoded:
+#       dataChunks: 2
+#       codingChunks: 1
 #     metadata_active: 1
 #     ## Optional to deploy ceph-mount pod to mount this filesystem on the host as well
 #     host_mount: true

@@ -11,6 +11,11 @@ spec:
   # For a pool based on raw copies, specify the number of copies. A size of 1 indicates no redundancy.
   replicated:
     size: {{ item.pool_replicas }}
+  # Make sure you have enough nodes and OSDs running bluestore to support the replica size or erasure code chunks.
+  # For the below settings, you need at least 3 OSDs on different nodes (because the `failureDomain` is `host` by default).
+  erasureCoded:
+    dataChunks: 2
+    codingChunks: 1
   # A key/value list of annotations
   annotations:
   #  key: value
