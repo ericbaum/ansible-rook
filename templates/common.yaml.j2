@@ -68,12 +68,6 @@ spec:
                   maximum: 9
                   minimum: 1
                   type: integer
-                preferredCount:
-                  maximum: 9
-                  minimum: 0
-                  type: integer
-              required:
-              - count
             network:
               properties:
                 hostNetwork:
@@ -149,6 +143,15 @@ spec:
                   type: integer
             placement: {}
             resources: {}
+            configOverrides:
+              items:
+                properties:
+                  who:
+                    type: string
+                  option:
+                    type: string
+                  value:
+                    type: string
           required:
           - mon
   additionalPrinterColumns:
@@ -628,6 +631,17 @@ rules:
   - "*"
   verbs:
   - "*"
+- apiGroups:
+  - policy
+  - apps
+  resources:
+  #this is for the clusterdisruption controller
+  - poddisruptionbudgets
+  #this is for both clusterdisruption and nodedrain controllers
+  - deployments
+  verbs:
+  - "*"
+
 ---
 # Aspects of ceph-mgr that require cluster-wide access
 kind: ClusterRole
@@ -715,6 +729,9 @@ metadata:
   labels:
     operator: rook
     storage-backend: ceph
+# imagePullSecrets:
+# - name: my-registry-secret
+
 # OLM: END SERVICE ACCOUNT SYSTEM
 # OLM: BEGIN OPERATOR ROLEBINDING
 ---
@@ -767,6 +784,9 @@ kind: ServiceAccount
 metadata:
   name: rook-ceph-osd
   namespace: {{ rook_cluster_namespace }}
+# imagePullSecrets:
+# - name: my-registry-secret
+
 # OLM: END SERVICE ACCOUNT OSD
 # OLM: BEGIN SERVICE ACCOUNT MGR
 ---
@@ -776,6 +796,9 @@ kind: ServiceAccount
 metadata:
   name: rook-ceph-mgr
   namespace: {{ rook_cluster_namespace }}
+# imagePullSecrets:
+# - name: my-registry-secret
+
 # OLM: END SERVICE ACCOUNT MGR
 # OLM: BEGIN CMD REPORTER SERVICE ACCOUNT
 ---
