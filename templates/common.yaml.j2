@@ -1,4 +1,4 @@
-## curl -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/common.yaml > common.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.1.7/cluster/examples/kubernetes/ceph/common.yaml > common.yaml
 
 ###################################################################################################################
 # Create the common resources that are necessary to start the operator and the ceph cluster.
@@ -60,20 +60,39 @@ spec:
             dataDirHostPath:
               pattern: ^/(\S+)
               type: string
+            skipUpgradeChecks:
+              type: boolean
             mon:
               properties:
                 allowMultiplePerNode:
                   type: boolean
                 count:
                   maximum: 9
-                  minimum: 1
+                  minimum: 0
                   type: integer
+            mgr:
+              properties:
+                modules:
+                  items:
+                    properties:
+                      name:
+                        type: string
+                      enabled:
+                        type: boolean
             network:
               properties:
                 hostNetwork:
                   type: boolean
             storage:
               properties:
+                disruptionManagement:
+                  properties:
+                    managePodBudgets:
+                      type: boolean
+                    osdMaintenanceTimeout:
+                      type: integer
+                    manageMachineDisruptionBudgets:
+                      type: boolean
                 useAllNodes:
                   type: boolean
                 nodes:
@@ -143,17 +162,6 @@ spec:
                   type: integer
             placement: {}
             resources: {}
-            configOverrides:
-              items:
-                properties:
-                  who:
-                    type: string
-                  option:
-                    type: string
-                  value:
-                    type: string
-          required:
-          - mon
   additionalPrinterColumns:
     - name: DataDirHostPath
       type: string
@@ -198,6 +206,8 @@ spec:
             metadataServer:
               properties:
                 activeCount:
+                  minimum: 1
+                  maximum: 10
                   type: integer
                 activeStandby:
                   type: boolean
@@ -211,6 +221,8 @@ spec:
                 replicated:
                   properties:
                     size:
+                      minimum: 1
+                      maximum: 10
                       type: integer
                 erasureCoded:
                   properties:
@@ -227,6 +239,8 @@ spec:
                   replicated:
                     properties:
                       size:
+                        minimum: 1
+                        maximum: 10
                         type: integer
                   erasureCoded:
                     properties:
@@ -235,9 +249,9 @@ spec:
                       codingChunks:
                         type: integer
   additionalPrinterColumns:
-    - name: MdsCount
+    - name: ActiveMDS
       type: string
-      description: Number of MDSs
+      description: Number of desired active MDS daemons
       JSONPath: .spec.metadataServer.activeCount
     - name: Age
       type: date
@@ -502,7 +516,6 @@ rules:
   resources:
   - deployments
   - daemonsets
-  - replicasets
   verbs:
   - get
   - list
@@ -639,9 +652,31 @@ rules:
   - poddisruptionbudgets
   #this is for both clusterdisruption and nodedrain controllers
   - deployments
+  - replicasets
   verbs:
   - "*"
-
+- apiGroups:
+  - healthchecking.openshift.io
+  resources:
+  - machinedisruptionbudgets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
+- apiGroups:
+  - machine.openshift.io
+  resources:
+  - machines
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - delete
 ---
 # Aspects of ceph-mgr that require cluster-wide access
 kind: ClusterRole
@@ -823,6 +858,20 @@ rules:
   resources: ["cephclusters", "cephclusters/finalizers"]
   verbs: [ "get", "list", "create", "update", "delete" ]
 ---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: rook-ceph-osd
+  namespace: {{ rook_cluster_namespace }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+---
 # Aspects of ceph-mgr that require access to the system namespace
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -982,6 +1031,22 @@ subjects:
 - kind: ServiceAccount
   name: rook-ceph-mgr
   namespace: {{ rook_cluster_namespace }}
+
+---
+# Allow the ceph osd to access cluster-wide resources necessary for determining their topology location
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: rook-ceph-osd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rook-ceph-osd
+subjects:
+- kind: ServiceAccount
+  name: rook-ceph-osd
+  namespace: {{ rook_cluster_namespace }}
+
 # OLM: END CLUSTER ROLEBINDING
 # OLM: BEGIN CMD REPORTER ROLEBINDING
 ---

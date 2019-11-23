@@ -30,8 +30,9 @@ spec:
       volumes:
       - name: ceph-to-host
         hostPath:
-            path: "{{ item.host_mount_path | default('/mnt') }}/rook-ceph_{{ item.name }}"
+          path: "{{ item.host_mount_path | default('/mnt') }}/rook-ceph_{{ item.name }}"
       - name: ceph-from-flex
+        ## TODO: use CSI instead of flex!!!
         flexVolume:
           driver: ceph.rook.io/rook
           fsType: ceph

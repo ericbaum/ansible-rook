@@ -9,18 +9,21 @@
   package:
     name: python-pip
     state: present
+  tags: prereq
 
 - name: ROOK Bootstrap - Install pip if necessary
   when: ansible_python.version.major == 3
   package:
     name: python3-pip
     state: present
+  tags: prereq
 
 # Bootstrap a node with openshift dependency if required
 - name: ROOK Bootstrap - Install openshift python library
   pip:
     name: openshift>=0.7.2
   when: rook_bootstrap
+  tags: prereq
 
 # Create the common resources necessary to start the operator and the ceph cluster
 - include_tasks: common.yaml
