@@ -1,4 +1,4 @@
-## curl -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml > cluster.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.1.7/cluster/examples/kubernetes/ceph/cluster.yaml > cluster.yaml
 
 #################################################################################################################
 # Define the settings for the rook-ceph cluster with common settings for a production cluster.
@@ -31,10 +31,21 @@ spec:
   # Important: if you reinstall the cluster, make sure you delete this directory from each host or else the mons will fail to start on the new cluster.
   # In Minikube, the '/data' directory is configured to persist across reboots. Use "/data/rook" in Minikube environment.
   dataDirHostPath: {{ rook_data_host_path }}
+  # Whether or not upgrade should continue even if a check fails
+  # This means Ceph's status could be degraded and we don't recommend upgrading but you might decide otherwise
+  # Use at your OWN risk
+  # To understand Rook's upgrade process of Ceph, read https://rook.io/docs/rook/master/ceph-upgrade.html#ceph-version-upgrades
+  skipUpgradeChecks: false
   # set the amount of mons to be started
   mon:
     count: {{ rook_mon_count }}
     allowMultiplePerNode: {{ rook_mon_multiple_per_node }}
+  mgr:
+    modules:
+    # Several modules should not need to be included in this list. The "dashboard" and "monitoring" modules
+    # are already enabled by other settings in the cluster CR and the "rook" module is always enabled.
+    # - name: pg_autoscaler
+    #   enabled: true
   # enable the ceph dashboard for viewing cluster status
   dashboard:
     enabled: {{ rook_dashboard_enabled }}
@@ -43,7 +54,7 @@ spec:
     # serve the dashboard at the given port.
     # port: 8443
     # serve the dashboard using SSL
-    # ssl: true
+    ssl: true
   # enable prometheus alerting for cluster
   monitoring:
     # requires Prometheus to be pre-installed
@@ -117,12 +128,21 @@ spec:
 # The above example requests/limits can also be added to the mon and osd components
 #    mon:
 #    osd:
+#    prepareosd:
+  # The option to automatically remove OSDs that are out and are safe to destroy.
+  removeOSDsIfOutAndSafeToRemove: true
+#  priorityClassNames:
+#    all: rook-ceph-default-priority-class
+#    mon: rook-ceph-mon-priority-class
+#    osd: rook-ceph-osd-priority-class
+#    mgr: rook-ceph-mgr-priority-class
   storage: # cluster level storage configuration and selection
     useAllNodes: true
-    useAllDevices: true
+    useAllDevices: false
+    topologyAware: true
     deviceFilter: {{ rook_osd_device_filter }}
     location:
-    config:
+    config: {{ rook_storage_config }}
       # The default and recommended storeType is dynamically set to bluestore for devices and filestore for directories.
       # Set the storeType explicitly only if it is required not to use the default.
       # storeType: bluestore
@@ -161,18 +181,17 @@ spec:
 #        storeType: filestore
 #    - name: "172.17.4.301"
 #      deviceFilter: "^sd."
-  # Override Ceph configs. These can be overridden by the user at runtime using the Ceph CLI, and
-  # Rook will set them back to the values set here when the operator restarts.
-#  configOverrides:
-#    - who: global
-#      option: debug ms
-#      value: "1/5"
-#    - who: osd.0
-#      option: debug_osd
-#      value: "10"
-#    - who: mon.a
-#      option: debug-mon
-#      value: "10"
-  disruptionManagement: #The section for configuring management of daemon disruptions
-    managePodBudgets: false #if `true`, the operator will create and manage PodDsruptionBudgets for OSD, Mon, RGW, and MDS daemons. OSD PDBs are managed dynamically via the strategy outlined in the [design](https://github.com/rook/rook/blob/master/design/ceph-managed-disruptionbudgets.md). The operator will block eviction of OSDs by default and unblock them safely when drains are detected.
-    osdMaintenanceTimeout: 30 # is a duration in minutes that determines how long an entire failureDomain like `region/zone/host` will be held in `noout` (in addition to the default DOWN/OUT interval) when it is draining. This is only relevant when  `managePodBudgets` is `true`. The default value is `30` minutes.
+  # The section for configuring management of daemon disruptions during upgrade or fencing.
+  disruptionManagement:
+    # If true, the operator will create and manage PodDisruptionBudgets for OSD, Mon, RGW, and MDS daemons. OSD PDBs are managed dynamically
+    # via the strategy outlined in the [design](https://github.com/rook/rook/blob/master/design/ceph-managed-disruptionbudgets.md). The operator will
+    # block eviction of OSDs by default and unblock them safely when drains are detected.
+    managePodBudgets: false
+    # A duration in minutes that determines how long an entire failureDomain like `region/zone/host` will be held in `noout` (in addition to the
+    # default DOWN/OUT interval) when it is draining. This is only relevant when  `managePodBudgets` is `true`. The default value is `30` minutes.
+    osdMaintenanceTimeout: 30
+    # If true, the operator will create and manage MachineDisruptionBudgets to ensure OSDs are only fenced when the cluster is healthy.
+    # Only available on OpenShift.
+    manageMachineDisruptionBudgets: false
+    # Namespace in which to watch for the MachineDisruptionBudgets.
+    machineDisruptionBudgetNamespace: openshift-machine-api

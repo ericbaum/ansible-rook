@@ -11,8 +11,8 @@ Requirements
 
 This role uses the k8s module which depends on Openshift:
 
-* openshift >= 0.7.2
-* PyYAML >= 3.11
+* openshift >= 0.9.2
+* PyYAML >= 5.1.0
 
 This role is actually capable of deploying Rook version: master
 
@@ -89,17 +89,17 @@ Example Playbook
         - pool_name: replicated-pool
           pool_replicas: 3
         ## Optionally, define storage classses
-        ## Currently, storage_class_provisioner supports: 'block' and 'filesystem'
-        ## https://github.com/rook/rook/blob/master/design/dynamic-provision-filesystem.md
-        ## For filesystem, at the moment, a PersistentVolume has to be manually created: https://github.com/rook/rook/issues/1125#issuecomment-469488011
+        ## Currently, storage_class_provisioner should use CSI driver in favor of Flex driver (https://github.com/rook/rook/blob/master/Documentation/ceph-filesystem.md#provision-storage)
         rook_storage_classes:
         - name: rook-storage-class-block
           block_pool_name: replicated-pool
           storage_class_provisioner: block
         - name: rook-storage-class-filesystem
           file_system_name: ceph_filesystem_name
-          storage_class_provisioner: filesystem
-        ## Alternatively, shared filesystems can be defined:
+          storage_class_provisioner: rook-ceph.cephfs.csi.ceph.com
+
+WIP!!!!!!!!!!!!!!!
+        ## Alternatively to storage pool, a shared filesystems can be defined:
         ceph_filesystems:
         - name: ceph_filesystem_name
           pool_replicas:

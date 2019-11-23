@@ -10,6 +10,8 @@
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ ceph_filesystems }}"
+  loop_control:
+    label: "{{ item | to_nice_yaml }}"
   tags: storage_creation
 
 - name: ROOK - Deploy Ceph mount on host pod for defined filesystems
@@ -23,6 +25,8 @@
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ ceph_filesystems }}"
+  loop_control:
+    label: "{{ item | to_nice_yaml }}"
   when: item.host_mount is defined and item.host_mount
   tags:
   - storage_creation

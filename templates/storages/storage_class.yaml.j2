@@ -1,4 +1,5 @@
-## curl -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/flex/storageclass.yaml > storage_class.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/flex/storageclass.yaml > storage_class_flex.yaml
+## curl -L https://github.com/rook/rook/raw/release-1.1/cluster/examples/kubernetes/ceph/csi/cephfs/storageclass.yaml > storage_class_csi.yaml
 
 #################################################################################################################
 # Create a storage class with a pool that sets replication for a production environment.
@@ -8,15 +9,66 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
    name: {{ item.name }}
-provisioner: ceph.rook.io/{{ item.storage_class_provisioner }}
+provisioner: {{ item.storage_class_provisioner }}
 parameters:
-{% if item.storage_class_provisioner == 'block' %}
+{% if item.storage_class_provisioner == 'ceph.rook.io/block' %}
   blockPool: {{ item.block_pool_name }}
   # Specify the filesystem type of the volume. If not specified, it will use `ext4`.
   fstype: {{ item.fstype | default('xfs') }}
 {% endif %}
-{% if item.storage_class_provisioner == 'filesystem' %}
+{% if item.storage_class_provisioner == 'ceph.rook.io/filesystem' %}
   fsName: {{ item.file_system_name }}
+{% endif %}
+{% if item.storage_class_provisioner == 'rook-ceph.cephfs.csi.ceph.com' %}
+  # clusterID is the namespace where operator is deployed, one per k8s, hardcoded.
+  clusterID: {{ rook_operator_namespace }}
+
+  # CephFS filesystem name into which the volume shall be created
+  fsName: {{ item.file_system_name }}
+
+  # Ceph pool into which the volume shall be created
+  # Required for provisionVolume: "true"
+  pool: {{ item.file_system_name }}-data0
+
+  # Root path of an existing CephFS volume
+  # Required for provisionVolume: "false"
+  # rootPath: /absolute/path
+
+  # The secrets contain Ceph admin credentials. These are generated automatically by the operator
+  # in the same namespace as the cluster.
+  csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+  csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+  csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+  csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+
+  # (optional) The driver can use either ceph-fuse (fuse) or ceph kernel client (kernel)
+  # If omitted, default volume mounter will be used - this is determined by probing for ceph-fuse
+  # or by setting the default mounter explicitly via --volumemounter command-line argument.
+  # mounter: kernel
+{% endif %}
+{% if item.storage_class_provisioner == 'rook-ceph.rbd.csi.ceph.com' %}
+    # clusterID is the namespace where the rook cluster is running
+    # If you change this namespace, also change the namespace below where the secret namespaces are defined
+    clusterID: {{ rook_operator_namespace }}
+
+    # Ceph pool into which the RBD image shall be created
+    pool: replicapool
+
+    # RBD image format. Defaults to "2".
+    imageFormat: "2"
+
+    # RBD image features. Available for imageFormat: "2". CSI RBD currently supports only `layering` feature.
+    imageFeatures: layering
+
+    # The secrets contain Ceph admin credentials. These are generated automatically by the operator
+    # in the same namespace as the cluster.
+    csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+    csi.storage.k8s.io/provisioner-secret-namespace:  {{ rook_operator_namespace }}
+    csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+    csi.storage.k8s.io/node-stage-secret-namespace:  {{ rook_operator_namespace }}
+    # Specify the filesystem type of the volume. If not specified, csi-provisioner
+    # will set default as `ext4`.
+    csi.storage.k8s.io/fstype: ext4
 {% endif %}
   # The value of "clusterNamespace" MUST be the same as the one in which your rook cluster exist
   clusterNamespace: {{ rook_cluster_namespace }}
@@ -25,6 +77,11 @@ parameters:
   # (Optional) Specify an existing Kubernetes secret name containing just one key holding the Ceph user secret.
   # The secret must exist in each namespace(s) where the storage will be consumed.
   #mountSecret: ceph-user1-secret
-# Optional, default reclaimPolicy is "Delete". Other options are: "Retain", 
-# "Recycle" as documented in https://kubernetes.io/docs/concepts/storage/storage-classes/
+# Optional, default reclaimPolicy is "Delete". Other options are: 
+# "Retain", "Recycle" as documented in https://kubernetes.io/docs/concepts/storage/storage-classes/
 reclaimPolicy: Retain
+{% if item.mountOptions is defined %}
+mountOptions: {{ item.mountOptions }}
+  # uncomment the following line for debugging
+  #- debug
+{% endif %}

@@ -10,29 +10,32 @@
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ lookup('template', 'operator.yaml.j2') | from_yaml_all | list }}"
-
-# Verify the deployment is completed
+  loop_control:
+    label: "{{ item | to_nice_yaml }}"
+  tags: deploy_operator
 
 - name: ROOK - Verify if the rook operator is up and running
   k8s:
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
-    api_version: apps/v1beta1
+    api_version: apps/v1
     kind: Deployment
     name: rook-ceph-operator
     namespace: "{{ rook_operator_namespace }}"
   register: ret
-  until: ret.get('result', {}).get('status', {}).get('conditions', [])[0].get('status') == "True"
+  until: ret.get('result', {}).get('status', {}).get('conditions', []) | length and ret.get('result', {}).get('status', {}).get('conditions', [])[0].get('status') == "True"
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
+  tags: deploy_operator
 
-- name: ROOK - Verify if the agents are running
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
-    api_version: extensions/v1beta1
-    kind: DaemonSet
-    name: rook-ceph-agent
-    namespace: "{{ rook_operator_namespace }}"
-  register: ret
-  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200 or (ret.get('result', {}).get('status', {}).get('desiredNumberScheduled') == ret.get('result', {}).get('status', {}).get('numberReady')
-  retries: "{{ k8s_task_retries | default(3) }}"
-  delay: "{{ k8s_task_delay | default(15) }}"
+#- name: ROOK - Verify if the agents are running
+#  k8s:
+#    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
+#    api_version: apps/v1
+#    kind: DaemonSet
+#    name: rook-ceph-agent
+#    namespace: "{{ rook_operator_namespace }}"
+#  register: ret
+#  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200 or (ret.get('result', {}).get('status', {}).get('desiredNumberScheduled') == ret.get('result', {}).get('status', {}).get('numberReady'))
+#  retries: "{{ k8s_task_retries | default(3) }}"
+#  delay: "{{ k8s_task_delay | default(15) }}"
+#  tags: deploy_operator

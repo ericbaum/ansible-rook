@@ -10,3 +10,4 @@
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ lookup('template', 'common.yaml.j2') | from_yaml_all | list }}"
+  tags: deploy_common

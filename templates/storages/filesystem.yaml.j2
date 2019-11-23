@@ -27,6 +27,8 @@ spec:
       replicated:
         size: {{ item.pool_replicas.data }}
 {% endif %}
+  # Whether to preserve metadata and data pools on filesystem deletion
+  preservePoolsOnDelete: true
   # The metadata service (mds) configuration
   metadataServer:
     # The number of active MDS instances
@@ -70,3 +72,4 @@ spec:
     #  requests:
     #    cpu: "500m"
     #    memory: "1024Mi"
+    # priorityClassName: my-priority-class
