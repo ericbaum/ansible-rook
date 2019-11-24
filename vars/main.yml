@@ -11,14 +11,14 @@
 # The expected format can be found below:
 # rook_storage_classes:
 #   - name: class_name
-#     block_pool_name: pool_name
-#     storage_class_provisioner: block
+#     blockPoolName: pool_name
+#     storageClassProvisioner: rook-ceph.rbd.csi.ceph.com
 #   - name: rook-storage-class-filesystem
-#     file_system_name: myFS
-#     storage_class_provisioner: filesystem
+#     fileSystemName: myFS
+#     storageClassProvisioner: rook-ceph.cephfs.csi.ceph.com
 
 ## This defines a list of shared ceph filesystems (do not use underscores in name)
-# ceph_filesystems:
+# ceph_file_systems:
 #   - name: ceph-filesystem-name
 #     ## use either pool_replicas...
 #     pool_replicas:
@@ -29,7 +29,11 @@
 #       dataChunks: 2
 #       codingChunks: 1
 #     metadata_active: 1
-#     ## Optional to deploy ceph-mount pod to mount this filesystem on the host as well
-#     host_mount: true
-#     ## Optional for the ceph-mount pods, that mount this whole filesystem on the host
-#     host_mount_path: /mnt
+
+## [Optional] deploy ceph-mount to mount this filesystem on the host as well
+# rook_mount_on_host:
+# - name: mount-repl-shared-fs
+#   storageClassName: rook-ceph-filesystem-class
+#   enabled: true
+#   ## Optional for the ceph-mount pods, that mount this whole filesystem on the host
+#   hostPath: /mnt

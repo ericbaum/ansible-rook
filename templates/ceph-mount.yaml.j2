@@ -1,4 +1,4 @@
-apiVersion: extensions/v1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: rook-ceph-mount-{{ item.name }}
@@ -26,17 +26,18 @@ spec:
           name: ceph-to-host
           mountPropagation: Bidirectional
         - mountPath: "/mnt/ceph-to-host/mounted"
-          name: ceph-from-flex
+          name: ceph
       volumes:
       - name: ceph-to-host
         hostPath:
-          path: "{{ item.host_mount_path | default('/mnt') }}/rook-ceph_{{ item.name }}"
-      - name: ceph-from-flex
-        ## TODO: use CSI instead of flex!!!
-        flexVolume:
-          driver: ceph.rook.io/rook
-          fsType: ceph
-          options:
-            fsName: {{ item.name }}
-            clusterNamespace: {{ rook_cluster_namespace }}
-            path: '/'
+          path: "{{ item.hostPath | default('/mnt') }}/rook-ceph_{{ item.name }}"
+      - name: ceph
+        persistentVolumeClaim:
+          claimName: {{ item.name }}
+#        flexVolume:
+#          driver: ceph.rook.io/rook
+#          fsType: ceph
+#          options:
+#            fsName: {{ item.name }}
+#            clusterNamespace: {{ rook_cluster_namespace | default('rook-ceph') }}
+#            path: '/'

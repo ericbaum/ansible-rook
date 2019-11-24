@@ -89,28 +89,30 @@ Example Playbook
         - pool_name: replicated-pool
           pool_replicas: 3
         ## Optionally, define storage classses
-        ## Currently, storage_class_provisioner should use CSI driver in favor of Flex driver (https://github.com/rook/rook/blob/master/Documentation/ceph-filesystem.md#provision-storage)
+        ## Currently, storageClassProvisioner should use CSI driver in favor of Flex driver (https://github.com/rook/rook/blob/master/Documentation/ceph-filesystem.md#provision-storage)
         rook_storage_classes:
         - name: rook-storage-class-block
-          block_pool_name: replicated-pool
-          storage_class_provisioner: block
+          blockPoolName: replicated-pool
+          storageClassProvisioner: rook-ceph.rbd.csi.ceph.com
         - name: rook-storage-class-filesystem
-          file_system_name: ceph_filesystem_name
-          storage_class_provisioner: rook-ceph.cephfs.csi.ceph.com
+          fileSystemName: ceph_filesystem_name
+          storageClassProvisioner: rook-ceph.cephfs.csi.ceph.com
 
-WIP!!!!!!!!!!!!!!!
         ## Alternatively to storage pool, a shared filesystems can be defined:
-        ceph_filesystems:
+        ceph_file_systems:
         - name: ceph_filesystem_name
           pool_replicas:
             metadata: 3
             data: 3
           metadata_active: 1
-          ## Optional to deploy ceph-mount pod to mount this filesystem on the host as well
-          host_mount: true
-          ## Optional for the ceph-mount pods, that mount this whole filesystem on the host
-          host_mount_path: /mnt
 
+        ## Optional to deploy ceph-mount pod to mount this filesystem on the host as well
+        rook_mount_on_host:
+        - name: mount-repl-shared-fs
+          storageClassName: rook-ceph-filesystem-class
+          enabled: true
+          ## Optional for the ceph-mount pods, that mount this whole filesystem on the host
+          hostPath: /mnt
 
       roles:
         - role: ansible-rook
