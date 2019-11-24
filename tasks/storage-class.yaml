@@ -4,7 +4,7 @@
   k8s:
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
-    definition: "{{ lookup('template', 'storages/storage_class.yaml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'storages/storage-class.yaml.j2') | from_yaml }}"
   register: ret
   until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200
   retries: "{{ k8s_task_retries | default(3) }}"

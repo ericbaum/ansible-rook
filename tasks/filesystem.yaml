@@ -1,33 +1,14 @@
-# Create storage classes as defined on variables
-
+# Create rook shared filesystem
 - name: ROOK - Create Rook Shared Filesystem
   k8s:
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
-    definition: "{{ lookup('template', 'storages/filesystem.yaml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'storages/file-system.yaml.j2') | from_yaml }}"
   register: ret
   until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
-  loop: "{{ ceph_filesystems }}"
+  loop: "{{ ceph_file_systems }}"
   loop_control:
     label: "{{ item | to_nice_yaml }}"
   tags: storage_creation
-
-- name: ROOK - Deploy Ceph mount on host pod for defined filesystems
-  k8s:
-    kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
-    force: yes
-    state: present
-    definition: "{{ lookup('template', 'ceph-mount.yaml.j2') | from_yaml }}"
-  register: ret
-  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200
-  retries: "{{ k8s_task_retries | default(3) }}"
-  delay: "{{ k8s_task_delay | default(15) }}"
-  loop: "{{ ceph_filesystems }}"
-  loop_control:
-    label: "{{ item | to_nice_yaml }}"
-  when: item.host_mount is defined and item.host_mount
-  tags:
-  - storage_creation
-  - storage_mount
