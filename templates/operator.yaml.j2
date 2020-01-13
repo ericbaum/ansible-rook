@@ -1,4 +1,4 @@
-## curl -L https://raw.githubusercontent.com/rook/rook/v1.1.7/cluster/examples/kubernetes/ceph/operator.yaml > operator.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.2.1/cluster/examples/kubernetes/ceph/operator.yaml > operator.yaml
 
 #################################################################################################################
 # The deployment for the rook operator
@@ -102,6 +102,9 @@ spec:
         #     - effect: NoExecute
         #       key: node-role.kubernetes.io/etcd
         #       operator: Exists
+        # (Optional) Rook Discover priority class name to set on the pod(s)
+        # - name: DISCOVER_PRIORITY_CLASS_NAME
+        #   value: "<PriorityClassName>"
         # (Optional) Discover Agent NodeAffinity.
         # - name: DISCOVER_AGENT_NODE_AFFINITY
         #   value: "role=storage-node; storage=rook, ceph"
@@ -154,6 +157,14 @@ spec:
         - name: ROOK_DISABLE_DEVICE_HOTPLUG
           value: "{{ rook_disable_device_hotplug }}"
 
+        # Provide customised regex as the values using comma. For eg. regex for rbd based volume, value will be like "(?i)rbd[0-9]+".
+        # In case of more than one regex, use comma to seperate between them.
+        # Default regex will be "(?i)dm-[0-9]+,(?i)rbd[0-9]+,(?i)nbd[0-9]+"
+        # Add regex expression after putting a comma to blacklist a disk
+        # If value is empty, the default regex will be used.
+        - name: DISCOVER_DAEMON_UDEV_BLACKLIST
+          value: "(?i)dm-[0-9]+,(?i)rbd[0-9]+,(?i)nbd[0-9]+"
+
         # Whether to enable the flex driver. By default it is enabled and is fully supported, but will be deprecated in some future release
         # in favor of the CSI driver.
         - name: ROOK_ENABLE_FLEX_DRIVER
@@ -173,11 +184,27 @@ spec:
           value: "true"
         - name: ROOK_CSI_ENABLE_GRPC_METRICS
           value: "true"
+        # Enable deployment of snapshotter container in ceph-csi provisioner.
+        - name: CSI_ENABLE_SNAPSHOTTER
+          value: "true"
+        # Enable Ceph Kernel clients on kernel < 4.17 which support quotas for Cephfs
+        # If you disable the kernel client, your application may be disrupted during upgrade.
+        # See the upgrade guide: https://rook.io/docs/rook/v1.2/ceph-upgrade.html
+        - name: CSI_FORCE_CEPHFS_KERNEL_CLIENT
+          value: "true"
+        # CSI CephFS plugin daemonset update strategy, supported values are OnDelete and RollingUpdate.
+        # Default value is RollingUpdate.
+        #- name: CSI_CEPHFS_PLUGIN_UPDATE_STRATEGY
+        #  value: "OnDelete"
+        # CSI Rbd plugin daemonset update strategy, supported values are OnDelete and RollingUpdate.
+        # Default value is RollingUpdate.
+        #- name: CSI_RBD_PLUGIN_UPDATE_STRATEGY
+        #  value: "OnDelete"
         # The default version of CSI supported by Rook will be started. To change the version
         # of the CSI driver to something other than what is officially supported, change
         # these images to the desired release of the CSI driver.
         #- name: ROOK_CSI_CEPH_IMAGE
-        #  value: "quay.io/cephcsi/cephcsi:v1.2.1"
+        #  value: "quay.io/cephcsi/cephcsi:v1.2.2"
         #- name: ROOK_CSI_REGISTRAR_IMAGE
         #  value: "quay.io/k8scsi/csi-node-driver-registrar:v1.1.0"
         #- name: ROOK_CSI_PROVISIONER_IMAGE
@@ -225,6 +252,21 @@ spec:
         #  value: "9090"
         #- name: CSI_RBD_LIVENESS_METRICS_PORT
         #  value: "9080"
+
+        # Time to wait until the node controller will move Rook pods to other
+        # nodes after detecting an unreachable node.
+        # Pods affected by this setting are:
+        # mgr, rbd, mds, rgw, nfs, PVC based mons and osds, and ceph toolbox
+        # The value used in this variable replaces the default value of 300 secs
+        # added automatically by k8s as Toleration for
+        # <node.kubernetes.io/unreachable>
+        # The total amount of time to reschedule Rook pods in healthy nodes
+        # before detecting a <not ready node> condition will be the sum of:
+        #  --> node-monitor-grace-period: 40 seconds (k8s kube-controller-manager flag)
+        #  --> ROOK_UNREACHABLE_NODE_TOLERATION_SECONDS: 5 seconds
+        - name: ROOK_UNREACHABLE_NODE_TOLERATION_SECONDS
+          value: "5"
+
         # The name of the node to pass with the downward API
         - name: NODE_NAME
           valueFrom:
@@ -240,6 +282,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+      # Uncomment it to run rook operator on the host network
+      #hostNetwork: true
       volumes:
       - name: rook-config
         emptyDir: {}
