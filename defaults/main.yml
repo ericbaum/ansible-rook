@@ -3,7 +3,7 @@
 
 rook_bootstrap: true
 
-rook_version: v1.1.7
+rook_version: v1.2.1
 
 # Name of the namespaces for the operator and for the cluster
 rook_operator_namespace: rook-ceph
@@ -50,7 +50,7 @@ rook_disable_device_hotplug: false
 # Note, as per docs https://github.com/rook/rook/blob/master/Documentation/ceph-cluster-crd.md#osd-configuration-settings, bluestore is not recommended for directories, so using erausre codes is not a viable option
 #rook_storage_dir: "/rook-storage"
 
-ceph_version: v14.2.4-20191112
+ceph_version: v14.2.5
 
 k8s_task_retries: 10
 k8s_task_delay: 15

@@ -14,8 +14,8 @@ spec:
   # Make sure you have enough nodes and OSDs running bluestore to support the replica size or erasure code chunks.
   # For the below settings, you need at least 3 OSDs on different nodes (because the `failureDomain` is `host` by default).
   erasureCoded:
-    dataChunks: 2
-    codingChunks: 1
+    dataChunks: {{ item.dataChunks | default(2) }}
+    codingChunks: {{ item.codingChunks | default(1) }}
   # A key/value list of annotations
   annotations:
   #  key: value
