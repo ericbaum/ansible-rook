@@ -1,7 +1,11 @@
-## curl -L https://github.com/rook/rook/raw/release-1.2/cluster/examples/kubernetes/ceph/csi/cephfs/storageclass.yaml > storage_class_csi.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/csi/cephfs/storageclass.yaml > storage_class_csi.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/csi/rbd/storageclass-ec.yaml >> storage_class_csi.yaml
 
 #################################################################################################################
-# Create a storage class with a pool that sets replication for a production environment.
+# Create a storage class with a data pool that uses erasure coding for a production environment.
+# A metadata pool is created with replication enabled. A minimum of 3 nodes with OSDs are required in this
+# example since the default failureDomain is host.
+#  kubectl create -f storageclass-ec.yaml
 #################################################################################################################
 
 apiVersion: storage.k8s.io/v1
@@ -40,8 +44,14 @@ parameters:
   # or by setting the default mounter explicitly via --volumemounter command-line argument.
   # mounter: kernel
 {% elif item.storageClassProvisioner == 'rook-ceph.rbd.csi.ceph.com' %}
+  # If you want to use erasure coded pool with RBD, you need to create
+  # two pools. one erasure coded and one replicated.
+  # You need to specify the replicated pool here in the `pool` parameter, it is
+  # used for the metadata of the images.
+  # The erasure coded pool must be set as the `dataPool` parameter below.
   # Ceph pool into which the RBD image shall be created
-  pool: {{ item.blockPoolName }}
+  dataPool: {{ item.dataBlockPoolName }}
+  pool: {{ item.metaBlockPoolName }}
 
   # RBD image format. Defaults to "2".
   imageFormat: "2"
@@ -59,15 +69,22 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-namespace:  {{ rook_operator_namespace }}
   # Specify the filesystem type of the volume. If not specified, csi-provisioner
   # will set default as `ext4`.
-  csi.storage.k8s.io/fstype: ext4
+  #csi.storage.k8s.io/fstype: ext4
+# uncomment the following to use rbd-nbd as mounter on supported nodes
+# **IMPORTANT**: If you are using rbd-nbd as the mounter, during upgrade you will be hit a ceph-csi
+# issue that causes the mount to be disconnected. You will need to follow special upgrade steps
+# to restart your application pods. Therefore, this option is not recommended.
+#mounter: rbd-nbd
+allowVolumeExpansion: true
 {% endif %}
   # The value of "clusterNamespace" MUST be the same as the one in which your rook cluster exist
-  clusterNamespace: {{ rook_cluster_namespace }}
+  #clusterNamespace: {{ rook_cluster_namespace }}
   # (Optional) Specify an existing Ceph user that will be used for mounting storage with this StorageClass.
   #mountUser: user1
   # (Optional) Specify an existing Kubernetes secret name containing just one key holding the Ceph user secret.
   # The secret must exist in each namespace(s) where the storage will be consumed.
   #mountSecret: ceph-user1-secret
+
 # Optional, default reclaimPolicy is "Delete". Other options are:
 # "Retain", "Recycle" as documented in https://kubernetes.io/docs/concepts/storage/storage-classes/
 reclaimPolicy: {{ item.reclaimPolicy | default('Retain') }}
