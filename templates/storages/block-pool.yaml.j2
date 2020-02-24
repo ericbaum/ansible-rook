@@ -8,15 +8,16 @@ spec:
   # The failure domain will spread the replicas of the data across different failure zones
   failureDomain: {{ item.failureDomain | default('host') }}
   # The root of the crush hierarchy that will be used for the pool. If not set, will use "default".
-  crushRoot: default
+  crushRoot: {{ item.crushRoot | default('default') }}
   # For a pool based on raw copies, specify the number of copies. A size of 1 indicates no redundancy.
+{% if item.replicated is defined %}
   replicated:
-    size: {{ item.pool_replicas }}
+    size: {{ item.replicated.size }}
+{% endif %}
+{% if item.erasureCoded is defined %}
   # Make sure you have enough nodes and OSDs running bluestore to support the replica size or erasure code chunks.
   # For the below settings, you need at least 3 OSDs on different nodes (because the `failureDomain` is `host` by default).
   erasureCoded:
-    dataChunks: {{ item.dataChunks | default(2) }}
-    codingChunks: {{ item.codingChunks | default(1) }}
-  # A key/value list of annotations
-  annotations:
-  #  key: value
+    dataChunks: {{ item.erasureCoded.dataChunks | default(2) }}
+    codingChunks: {{ item.erasureCoded.codingChunks | default(1) }}
+{% endif %}
