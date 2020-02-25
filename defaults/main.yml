@@ -50,7 +50,7 @@ rook_disable_device_hotplug: false
 # Note, as per docs https://github.com/rook/rook/blob/master/Documentation/ceph-cluster-crd.md#osd-configuration-settings, bluestore is not recommended for directories, so using erausre codes is not a viable option
 #rook_storage_dir: "/rook-storage"
 
-ceph_version: v14.2.6
+ceph_version: v14.2.7
 
 k8s_task_retries: 10
 k8s_task_delay: 15
