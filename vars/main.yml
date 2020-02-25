@@ -11,11 +11,30 @@
 # The expected format can be found below:
 # rook_storage_classes:
 #   - name: class_name
-#     blockPoolName: pool_name
+#     dataBlockPoolName: erasurecoded-data-pool
+#     metaBlockPoolName: replicated-metadata-pool
 #     storageClassProvisioner: rook-ceph.rbd.csi.ceph.com
 #   - name: rook-storage-class-filesystem
 #     fileSystemName: myFS
 #     storageClassProvisioner: rook-ceph.cephfs.csi.ceph.com
+
+## Ceph Block Device configuration (You can use CephFS and Ceph Block Device in the same storage cluster)
+# ceph_block_storage_pools:
+# - pool_name: erasurecoded-data-pool
+#   erasureCoded:
+#     dataChunks: 2
+#     codingChunks: 1
+# - pool_name: replicated-metadata-pool
+#   replicated:
+#     size: 3
+#
+## Configurations related to Ceph rbd (Block Storage)
+# rook_osd_device_filter: "raw_device_name"
+# rook_storage_config:
+#   ## Comment "metadataDevice" If you don't have a separate device for metadata
+#   metadataDevice: "sdb"
+#   databaseSizeMB: "1024"
+#   journalSizeMB: "1024"
 
 ## This defines a list of shared ceph filesystems (do not use underscores in name)
 # ceph_file_systems:
