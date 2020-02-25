@@ -86,13 +86,28 @@ Example Playbook
       vars:
         ## Define a storage pool
         ceph_block_storage_pools:
-        - pool_name: replicated-pool
-          pool_replicas: 3
+        - pool_name: replicated-metadata-pool
+          replicated:
+            size: 3
+        - pool_name: erasurecoded-data-pool
+          erasureCoded:
+            dataChunks: 2
+            codingChunks: 1
+
+        ## Configurations related to Ceph rbd (Block Storage)
+        rook_osd_device_filter: "raw_device_name"
+        rook_storage_config:
+        ## Comment "metadataDevice" If you don't have a separate device for metadata
+          metadataDevice: "sdb"
+          databaseSizeMB: "1024"
+          journalSizeMB: "1024"
+
         ## Optionally, define storage classses
         ## Currently, storageClassProvisioner should use CSI driver in favor of Flex driver (https://github.com/rook/rook/blob/master/Documentation/ceph-filesystem.md#provision-storage)
         rook_storage_classes:
         - name: rook-storage-class-block
-          blockPoolName: replicated-pool
+          dataBlockPoolName: erasurecoded-data-pool
+          metaBlockPoolName: replicated-metadata-pool
           storageClassProvisioner: rook-ceph.rbd.csi.ceph.com
         - name: rook-storage-class-filesystem
           fileSystemName: ceph_filesystem_name
