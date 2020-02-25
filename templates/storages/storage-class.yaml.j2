@@ -69,7 +69,7 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-namespace:  {{ rook_operator_namespace }}
   # Specify the filesystem type of the volume. If not specified, csi-provisioner
   # will set default as `ext4`.
-  #csi.storage.k8s.io/fstype: ext4
+  #csi.storage.k8s.io/fstype: xfs
 # uncomment the following to use rbd-nbd as mounter on supported nodes
 # **IMPORTANT**: If you are using rbd-nbd as the mounter, during upgrade you will be hit a ceph-csi
 # issue that causes the mount to be disconnected. You will need to follow special upgrade steps
