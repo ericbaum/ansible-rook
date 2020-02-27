@@ -158,9 +158,8 @@ License
 
 GPLv3
 
-Author Information
+Authors Information
 ------------------
 
-Eric Baum, 2018
-
-https://github.com/ericbaum
+1. Eric Baum, 2018 - https://github.com/ericbaum
+2. Revomatico - http://revomatico.com
