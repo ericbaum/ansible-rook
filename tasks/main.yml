@@ -54,8 +54,8 @@
   when: ceph_file_systems is defined and ceph_file_systems is iterable
 
 # Optionally mount filesystem on host
-- import_tasks: mount-on-host.yaml
-  tags: storage_mount
-  when: rook_mount_on_host is defined and rook_mount_on_host is iterable
+#- import_tasks: mount-on-host.yaml
+#  tags: storage_mount
+#  when: rook_mount_on_host is defined and rook_mount_on_host is iterable
 
 # TODO: Install other rook components as required
