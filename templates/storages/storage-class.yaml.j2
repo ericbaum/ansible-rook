@@ -50,14 +50,18 @@ parameters:
   # used for the metadata of the images.
   # The erasure coded pool must be set as the `dataPool` parameter below.
   # Ceph pool into which the RBD image shall be created
+{% if item.metaBlockPoolName is defined %}
   dataPool: {{ item.dataBlockPoolName }}
   pool: {{ item.metaBlockPoolName }}
+{% else %}
+  pool: {{ item.dataBlockPoolName }}
+{% endif %}
 
   # RBD image format. Defaults to "2".
   imageFormat: "2"
 
   # RBD image features. Available for imageFormat: "2". CSI RBD currently supports only `layering` feature.
-  imageFeatures: layering
+  imageFeatures: {{ item.imageFeatures | default('layering') }}
 
   # The secrets contain Ceph admin credentials. These are generated automatically by the operator
   # in the same namespace as the cluster.
