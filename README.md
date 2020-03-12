@@ -94,7 +94,7 @@ Example Playbook
             dataChunks: 2
             codingChunks: 1
 
-        ## Configurations related to Ceph rbd (Block Storage)
+        ## A device will be skipped if Rook detects an existing partition or a filesystem.
         rook_osd_device_filter: "raw_device_name"
         rook_storage_config:
         ## Comment "metadataDevice" If you don't have a separate device for metadata
