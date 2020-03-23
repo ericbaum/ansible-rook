@@ -1,4 +1,4 @@
-## curl -L https://raw.githubusercontent.com/rook/rook/v1.2.5/cluster/examples/kubernetes/ceph/operator.yaml > operator.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.2.6/cluster/examples/kubernetes/ceph/operator.yaml > operator.yaml
 
 #################################################################################################################
 # The deployment for the rook operator
@@ -240,10 +240,10 @@ spec:
         # these images to the desired release of the CSI driver.
         - name: ROOK_CSI_CEPH_IMAGE
           value: "quay.io/cephcsi/cephcsi:{{ ceph_csi_version }}"
-        #- name: ROOK_CSI_REGISTRAR_IMAGE
-        #  value: "quay.io/k8scsi/csi-node-driver-registrar:v1.2.0"
-        #- name: ROOK_CSI_RESIZER_IMAGE
-        #  value: "quay.io/k8scsi/csi-resizer:v0.4.0"
+        - name: ROOK_CSI_REGISTRAR_IMAGE
+          value: "quay.io/k8scsi/csi-node-driver-registrar:{{ csi_node_driver_registrar }}"
+        - name: ROOK_CSI_RESIZER_IMAGE
+          value: "quay.io/k8scsi/csi-resizer:{{ csi_resizer }}"
         - name: ROOK_CSI_PROVISIONER_IMAGE
           value: "quay.io/k8scsi/csi-provisioner:{{ csi_provisioner_version }}"
         - name: ROOK_CSI_SNAPSHOTTER_IMAGE
