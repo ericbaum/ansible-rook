@@ -75,7 +75,7 @@ spec:
   rbdMirroring:
     # The number of daemons that will perform the rbd mirroring.
     # rbd mirroring must be configured with "rbd mirror" from the rook toolbox.
-    workers: 0
+    workers: {{ rook_rbd_mirroring_workers | default(0) }}
   # enable the crash collector for ceph daemon crash collection
   crashCollector:
     disable: false
