@@ -3,7 +3,7 @@
 
 rook_bootstrap: true
 
-rook_version: v1.2.6
+rook_version: v1.2.7
 
 ceph_version: v14.2.8
 

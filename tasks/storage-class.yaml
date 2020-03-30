@@ -7,7 +7,9 @@
     definition: "{{ lookup('template', 'storages/storage-class.yaml.j2') | from_yaml }}"
     force: "{{ item.force | default(omit) }}"
   register: ret
-  until: not ret.failed or ret.get('rc') != 0 or ret.get('status') != 200
+  until: |
+    not ret.get('failed', false)
+    or ret.get('status', 200) != 200
   retries: "{{ k8s_task_retries | default(3) }}"
   delay: "{{ k8s_task_delay | default(15) }}"
   loop: "{{ rook_storage_classes }}"
