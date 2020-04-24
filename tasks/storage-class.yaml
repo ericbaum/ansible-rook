@@ -4,7 +4,7 @@
   k8s:
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
-    definition: "{{ lookup('template', 'storages/storage-class.yaml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'storages/storageclass.yaml.j2') | from_yaml }}"
     force: "{{ item.force | default(omit) }}"
   register: ret
   until: |

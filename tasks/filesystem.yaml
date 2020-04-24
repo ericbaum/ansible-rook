@@ -3,7 +3,7 @@
   k8s:
     kubeconfig: "{{ kubeconfig_file_path | default(omit) }}"
     state: present
-    definition: "{{ lookup('template', 'storages/file-system.yaml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'storages/filesystem.yaml.j2') | from_yaml }}"
   register: ret
   until: |
     not ret.get('failed', false)

@@ -36,12 +36,6 @@ Example Playbook
       roles:
          - { role: ansible-rook, rook_osd_device_filter: sdb, rook_mon_count: 1 }
     ```
-- Using a directory:
-    ```yaml
-    - hosts: kubernetes-master-node
-      roles:
-         - { role: ansible-rook, rook_storage_dir: '/rook-storage', rook_mon_count: 3 }
-    ```
 - A more detailed playbook:
     ```yaml
     - hosts: nodes
@@ -58,7 +52,7 @@ Example Playbook
           mode: "{{ rook_storage_dir_permissions | default('0755') }}"
           owner: "{{ rook_storage_dir_owner | default('0') }}"
           group: "{{ rook_storage_dir_group | default('0') }}"
-        loop: "{{ [ rook_storage_dir | default('') ] + [ rook_data_host_path | default('') ] }}"
+        loop: "{{ [ rook_data_host_path | default('') ] }}"
         when: item | length
       - name: Install requirements
         pip:
@@ -132,7 +126,6 @@ Example Playbook
       roles:
         - role: ansible-rook
           rook_osd_device_filter: ''
-          rook_storage_dir: '/rook-storage'
           rook_mon_count: 1
 
 

@@ -1,12 +1,5 @@
-## curl -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/csi/cephfs/storageclass.yaml > storage_class_csi.yaml
-## curl -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/csi/rbd/storageclass-ec.yaml >> storage_class_csi.yaml
-
-#################################################################################################################
-# Create a storage class with a data pool that uses erasure coding for a production environment.
-# A metadata pool is created with replication enabled. A minimum of 3 nodes with OSDs are required in this
-# example since the default failureDomain is host.
-#  kubectl create -f storageclass-ec.yaml
-#################################################################################################################
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.3.2/cluster/examples/kubernetes/ceph/csi/cephfs/storageclass.yaml > storageclass-cephfs.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.3.2/cluster/examples/kubernetes/ceph/csi/rbd/storageclass-ec.yaml > storageclass-rbd-ec.yaml
 
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -14,8 +7,7 @@ metadata:
   name: {{ item.name }}
 provisioner: {{ item.storageClassProvisioner }}
 parameters:
-  # clusterID is the namespace where the rook cluster is running
-  # If you change this namespace, also change the namespace below where the namespace secrets are defined
+  # clusterID is the namespace where operator is deployed.
   clusterID: {{ rook_operator_namespace }}
 
 {% if item.storageClassProvisioner == 'rook-ceph.cephfs.csi.ceph.com' %}
@@ -24,7 +16,7 @@ parameters:
 
   # Ceph pool into which the volume shall be created
   # Required for provisionVolume: "true"
-  pool: {{ item.fileSystemName }}-data0
+  pool: {{ item.fileSystemName }}-data
 
   # Root path of an existing CephFS volume
   # Required for provisionVolume: "false"
@@ -73,7 +65,7 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-namespace:  {{ rook_operator_namespace }}
   # Specify the filesystem type of the volume. If not specified, csi-provisioner
   # will set default as `ext4`.
-  csi.storage.k8s.io/fstype: xfs
+  csi.storage.k8s.io/fstype: {{ item.fstype | default('ext4') }}
 # uncomment the following to use rbd-nbd as mounter on supported nodes
 # **IMPORTANT**: If you are using rbd-nbd as the mounter, during upgrade you will be hit a ceph-csi
 # issue that causes the mount to be disconnected. You will need to follow special upgrade steps
