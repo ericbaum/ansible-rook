@@ -70,7 +70,9 @@ spec:
     # deployed) to set rulesNamespace for all the clusters. Otherwise, you will get duplicate alerts with multiple alert definitions.
     rulesNamespace: {{ rook_cluster_namespace }}
   network:
+{% if (rook_host_net_provider | default('')) != '' %}
     provider: {{ rook_host_net_provider }}
+{% endif %}
     # enable host networking
     #provider: host
     # EXPERIMENTAL: enable the Multus network provider
