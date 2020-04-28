@@ -16,7 +16,7 @@ csi_resizer: v0.4.0
 # quay.io/k8scsi/csi-provisioner
 csi_provisioner_version: v1.6.0
 # quay.io/k8scsi/csi-snapshotter
-csi_snapshotter_version: v2.1.0
+csi_snapshotter_version: v1.2.2
 # quay.io/k8scsi/csi-attacher
 csi_attacher_version: v2.2.0
 

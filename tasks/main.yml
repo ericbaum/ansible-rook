@@ -41,21 +41,19 @@
 # Create all the define block pools
 - import_tasks: block_pool.yaml
   tags: storage_creation
-  when: ceph_block_storage_pools is defined and ceph_block_storage_pools is iterable
-
-# Create a Kubernetes Storage Class
-- import_tasks: storage-class.yaml
-  tags: storage_creation
-  when: rook_storage_classes is defined and rook_storage_classes is iterable
+  when: ceph_block_pools | default([]) | length
 
 # Create Ceph filesystems
 - import_tasks: filesystem.yaml
   tags: storage_creation
-  when: ceph_file_systems is defined and ceph_file_systems is iterable
+  when: ceph_file_systems | default([]) | length
+
+# Create a Kubernetes Storage Class
+- import_tasks: storage-class.yaml
+  tags: storage_creation
+  when: rook_storage_classes | default([]) | length
 
 # Optionally mount filesystem on host
 #- import_tasks: mount-on-host.yaml
 #  tags: storage_mount
 #  when: rook_mount_on_host is defined and rook_mount_on_host is iterable
-
-# TODO: Install other rook components as required
