@@ -3,12 +3,12 @@
 
 rook_bootstrap: true
 
-rook_version: v1.3.2
+rook_version: v1.3.3
 
 ceph_version: v14.2.9
 
 # quay.io/cephcsi/cephcsi
-ceph_csi_version: v2.1.0
+ceph_csi_version: v2.1.1
 # quay.io/k8scsi/csi-node-driver-registrar
 csi_node_driver_registrar: v1.2.0
 # quay.io/k8scsi/csi-resizer

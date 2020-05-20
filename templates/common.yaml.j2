@@ -1,4 +1,4 @@
-## curl -L https://raw.githubusercontent.com/rook/rook/v1.3.2/cluster/examples/kubernetes/ceph/common.yaml > common.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.3.3/cluster/examples/kubernetes/ceph/common.yaml > common.yaml
 
 ###################################################################################################################
 # Create the common resources that are necessary to start the operator and the ceph cluster.
@@ -1234,7 +1234,9 @@ subjects:
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: rook-privileged
+  # Note: Kubernetes matches PSPs to deployments alphabetically. In some environments, this PSP may
+  # need to be renamed with a value that will match before others.
+  name: 00-rook-privileged
   annotations:
     seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
     seccomp.security.alpha.kubernetes.io/defaultProfileName:  'runtime/default'
@@ -1313,7 +1315,7 @@ rules:
     resources:
       - podsecuritypolicies
     resourceNames:
-      - rook-privileged
+      - 00-rook-privileged
     verbs:
       - use
 ---
