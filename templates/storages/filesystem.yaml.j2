@@ -1,0 +1,114 @@
+## See https://github.com/rook/rook/blob/v1.3.6/cluster/examples/kubernetes/ceph/common.yaml#L252
+
+apiVersion: ceph.rook.io/v1
+kind: CephFilesystem
+metadata:
+  name: {{ item.name }}
+  namespace: {{ rook_cluster_namespace }}
+spec:
+
+  # The metadata pool spec. Must use replication (for the moment? - because allows erausreCoded as well)
+  metadataPool:
+    failureDomain: {{ item.metadataPool.failureDomain | default('host', true) }}
+    compressionMode: {{ item.metadataPool.compressionMode | default('none') }}
+{% if item.metadataPool.erasureCoded is defined %}
+    erasureCoded:
+      dataChunks: {{ item.metadataPool.erasureCoded.dataChunks | default(2) }}
+      codingChunks: {{ item.metadataPool.erasureCoded.codingChunks | default(1) }}
+{% elif item.metadataPool.replicated is defined %}
+    replicated:
+      size: {{ item.metadataPool.replicated.size | default(2) }}
+      requireSafeReplicaSize: {% if item.metadataPool.replicated.size | default(2) == 1 %}false{% else %}{{ item.metadataPool.replicated.requireSafeReplicaSize | default('true') }}{% endif %}
+
+{% else %}
+{{ item.metadataPool.replicated | mandatory }}
+{% endif %}
+
+  # The list of data pool specs. Can use replication or erasure coding.
+  dataPools:
+{% for pool in item.dataPools %}
+{% if pool.erasureCoded is defined %}
+  # See: https://rook.io/docs/rook/v1.3/ceph-filesystem-crd.html#erasure-coded
+  - erasureCoded:
+      dataChunks: {{ pool.erasureCoded.dataChunks | default(2) }}
+      codingChunks: {{ pool.erasureCoded.codingChunks | default(1) }}
+{% elif pool.replicated is defined %}
+  - replicated:
+      size: {{ pool.replicated.size | mandatory }}
+      # Disallow setting pool with replica 1, this could lead to data loss without recovery.
+      # Make sure you're *ABSOLUTELY CERTAIN* that is what you want
+      requireSafeReplicaSize: {% if pool.replicated.size | default(2) == 1 %}false{% else %}{{ pool.replicated.requireSafeReplicaSize | default('true') }}{% endif %}
+
+{% else %}
+{{ pool.replicated | mandatory }}
+{% endif %}
+    # Inline compression mode for the data pool
+    # Further reference: https://docs.ceph.com/docs/nautilus/rados/configuration/bluestore-config-ref/#inline-compression
+    compressionMode: {{ pool.compressionMode | default('none') }}
+    failureDomain: {{ pool.failureDomain | default('host') }}
+{% endfor %}
+
+  # Whether to preserve metadata and data pools on filesystem deletion
+  preservePoolsOnDelete: {{ item.preservePoolsOnDelete | default('true') }}
+  # The metadata service (mds) configuration
+  metadataServer:
+    # The number of active MDS instances
+    activeCount: {{ item.metadataServer.activeCount | default(1) }}
+    # Whether each active MDS instance will have an active standby with a warm metadata cache for faster failover.
+    # If false, standbys will be available, but will not have a warm cache.
+    activeStandby: {{ item.metadataServer.activeStandby | default('true') }}
+    # The affinity rules to apply to the mds deployment
+    placement:
+    #  nodeAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      nodeSelectorTerms:
+    #      - matchExpressions:
+    #        - key: role
+    #          operator: In
+    #          values:
+    #          - mds-node
+    #  topologySpreadConstraints:
+    #  tolerations:
+    #  - key: mds-node
+    #    operator: Exists
+    #  podAffinity:
+       podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rook-ceph-mds
+            # topologyKey: kubernetes.io/hostname will place MDS across different hosts
+            topologyKey: kubernetes.io/hostname
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - rook-ceph-mds
+              # topologyKey: */zone can be used to spread MDS across different AZ
+              # Use <topologyKey: failure-domain.beta.kubernetes.io/zone> in k8s cluster if your cluster is v1.16 or lower
+              # Use <topologyKey: topology.kubernetes.io/zone>  in k8s cluster is v1.17 or upper
+              topologyKey: topology.kubernetes.io/zone
+{% if item.metadataServer.annotations is defined %}
+    # A key/value list of annotations
+    annotations:
+      {{ item.metadataServer.annotations | to_nice_yaml | indent(6, indentfirst=false) }}
+{% endif %}
+{% if item.metadataServer.resources is defined %}
+    resources:
+    # The requests and limits set here, allow the filesystem MDS Pod(s) to use half of one CPU core and 1 gigabyte of memory
+    #  limits:
+    #    cpu: "500m"
+    #    memory: "1024Mi"
+    #  requests:
+    #    cpu: "500m"
+    #    memory: "1024Mi"
+    #  priorityClassName: my-priority-class
+      {{ item.metadataServer.resources | to_nice_yaml | indent(6, indentfirst=false) }}
+{% endif %}

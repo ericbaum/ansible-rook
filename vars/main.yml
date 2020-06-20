@@ -1,34 +1,8 @@
 ---
-# vars file for ansible-rook
+# Sample vars file for ansible-rook
 
-# This variable defines a list of storage pools that will be created
-# The expected format for the content of this variable is a list:
-# ceph_block_storage_pools:
-#   - pool_name: pool_name
-#     pool_replicas: 2
-
-# This variable defines a list of storage clases that will be created on the k8s cluster
-# The expected format can be found below:
-# rook_storage_classes:
-#   - name: class_name
-#     dataBlockPoolName: erasurecoded-data-pool
-#     metaBlockPoolName: replicated-metadata-pool
-#     storageClassProvisioner: rook-ceph.rbd.csi.ceph.com
-#   - name: rook-storage-class-filesystem
-#     fileSystemName: myFS
-#     storageClassProvisioner: rook-ceph.cephfs.csi.ceph.com
-
-## Ceph Block Device configuration (You can use CephFS and Ceph Block Device in the same storage cluster)
-# ceph_block_storage_pools:
-# - pool_name: erasurecoded-data-pool
-#   erasureCoded:
-#     dataChunks: 2
-#     codingChunks: 1
-# - pool_name: replicated-metadata-pool
-#   replicated:
-#     size: 3
-#
 ## Configurations related to Ceph rbd (Block Storage)
+## A device will be skipped if Rook detects an existing partition or a filesystem.
 # rook_osd_device_filter: "raw_device_name"
 # rook_storage_config:
 #   ## Comment "metadataDevice" If you don't have a separate device for metadata
@@ -36,23 +10,38 @@
 #   databaseSizeMB: "1024"
 #   journalSizeMB: "1024"
 
-## This defines a list of shared ceph filesystems (do not use underscores in name)
-# ceph_file_systems:
-#   - name: ceph-filesystem-name
-#     ## use either pool_replicas...
-#     pool_replicas:
-#       metadata: 3
-#       data: 3
-#     ## ... or erasureCoded
-#     erasureCoded:
-#       dataChunks: 2
-#       codingChunks: 1
-#     metadata_active: 1
+## Ceph Block Device configuration (You can use CephFS and Ceph Block Device in the same storage cluster)
+# ceph_block_pools:
+# - name: erasurecoded-data-pool
+#   erasureCoded:
+#     dataChunks: 2
+#     codingChunks: 1
+# - name: replicated-metadata-pool
+#   replicated:
+#     size: 3
 
-## [Optional] deploy ceph-mount to mount this filesystem on the host as well
-# rook_mount_on_host:
-# - name: mount-repl-shared-fs
-#   storageClassName: rook-ceph-filesystem-class
-#   enabled: true
-#   ## Optional for the ceph-mount pods, that mount this whole filesystem on the host
-#   hostPath: /mnt
+## Alternatively to storage pool, a Cheph filesystems can be defined:
+## See filesystem.yaml.j2 for allowed fields and spec
+#ceph_file_systems:
+#- name: ceph_filesystem_name
+#  metadataPool:
+#    replicated:
+#      size: 2
+#  dataPools:
+#  - replicated:
+#      size: 3
+#  ## Alternatively or in addition to, erasurecoded pool may be used
+#  - erasureCoded:
+#      dataChunks: 2
+#      codingChunks: 1
+
+## Optionally, define storage classses
+## storageClassProvisioner should use CSI driver in favor of Flex driver (https://github.com/rook/rook/blob/master/Documentation/ceph-filesystem.md#provision-storage)
+#rook_storage_classes:
+#- name: rook-storage-class-block
+#  dataPoolName: erasurecoded-data-pool
+#  metaPoolName: replicated-metadata-pool
+#  storageClassProvisioner: rook-ceph.rbd.csi.ceph.com
+#- name: rook-storage-class-filesystem
+#  fileSystemName: ceph_filesystem_name
+#  storageClassProvisioner: rook-ceph.cephfs.csi.ceph.com

@@ -1,0 +1,90 @@
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.3.6/cluster/examples/kubernetes/ceph/csi/cephfs/storageclass.yaml > storageclass-cephfs.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.3.6/cluster/examples/kubernetes/ceph/csi/rbd/storageclass-ec.yaml > storageclass-rbd-ec.yaml
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ item.name }}
+provisioner: {{ item.storageClassProvisioner }}
+parameters:
+  # clusterID is the namespace where the rook cluster is running
+  # If you change this namespace, also change the namespace below where the secret namespaces are defined
+  clusterID: {{ rook_cluster_namespace }}
+
+{% if item.storageClassProvisioner == 'rook-ceph.cephfs.csi.ceph.com' %}
+  # CephFS filesystem name into which the volume shall be created
+  fsName: {{ item.fileSystemName }}
+
+  # Ceph pool into which the volume shall be created
+  # Required for provisionVolume: "true"
+  pool: {{ item.dataPoolName | default(item.fileSystemName ~ '-data0') }}
+
+  # Root path of an existing CephFS volume
+  # Required for provisionVolume: "false"
+  # rootPath: /absolute/path
+
+  # The secrets contain Ceph admin credentials. These are generated automatically by the operator
+  # in the same namespace as the cluster.
+  csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+  csi.storage.k8s.io/provisioner-secret-namespace: {{ rook_cluster_namespace }}
+  csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+  csi.storage.k8s.io/controller-expand-secret-namespace: {{ rook_cluster_namespace }}
+  csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+  csi.storage.k8s.io/node-stage-secret-namespace: {{ rook_cluster_namespace }}
+
+{% if item.mounter is defined %}
+  # (optional) The driver can use either ceph-fuse (fuse) or ceph kernel client (kernel)
+  # If omitted, default volume mounter will be used - this is determined by probing for ceph-fuse
+  # or by setting the default mounter explicitly via --volumemounter command-line argument.
+  mounter: {{ item.mounter }}
+{% endif %}
+
+{% elif item.storageClassProvisioner == 'rook-ceph.rbd.csi.ceph.com' %}
+  # If you want to use erasure coded pool with RBD, you need to create
+  # two pools. one erasure coded and one replicated.
+  # You need to specify the replicated pool here in the `pool` parameter, it is
+  # used for the metadata of the images.
+  # The erasure coded pool must be set as the `dataPool` parameter below.
+  # Ceph pool into which the RBD image shall be created
+{% if item.metaPoolName is defined %}
+  dataPool: {{ item.dataPoolName }}
+  pool: {{ item.metaPoolName }}
+{% else %}
+  pool: {{ item.dataPoolName }}
+{% endif %}
+  # RBD image format. Defaults to "2".
+  imageFormat: "2"
+  # RBD image features.
+  # CSI RBD currently supports only `layering` feature.
+  # Starting with ceph_csi_version v3.0.0, 'journaling' and 'exclusive-lock' will be added
+  imageFeatures: {{ item.imageFeatures | default('layering') }}
+  # The secrets contain Ceph admin credentials. These are generated automatically by the operator
+  # in the same namespace as the cluster.
+  csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+  csi.storage.k8s.io/provisioner-secret-namespace:  {{ rook_cluster_namespace }}
+  csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+  csi.storage.k8s.io/controller-expand-secret-namespace: {{ rook_cluster_namespace }}
+  csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+  csi.storage.k8s.io/node-stage-secret-namespace:  {{ rook_cluster_namespace }}
+  # Specify the filesystem type of the volume. If not specified, csi-provisioner
+  # will set default as `ext4`.
+  # 'xfs' can be used as well.
+  csi.storage.k8s.io/fstype: {{ item.fstype | default('ext4') }}
+{% if item.mounter is defined %}
+  # **IMPORTANT**: If you are using rbd-nbd as the mounter, during upgrade you will be hit a ceph-csi
+  # issue that causes the mount to be disconnected. You will need to follow special upgrade steps
+  # to restart your application pods. Therefore, this option is not recommended.
+  mounter: {{ item.mounter }}
+{% endif %}
+allowVolumeExpansion: {{ item.allowVolumeExpansion | default('true') }}
+{% endif %}
+
+# Optional, default reclaimPolicy is "Delete". Other options are:
+# "Retain", "Recycle" as documented in https://kubernetes.io/docs/concepts/storage/storage-classes/
+reclaimPolicy: {{ item.reclaimPolicy | default('Retain') }}
+{% if item.mountOptions is defined %}
+mountOptions:
+# uncomment the following line for debugging
+#- debug
+{{ item.mountOptions | to_nice_yaml }}
+{% endif %}
