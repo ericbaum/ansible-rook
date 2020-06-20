@@ -52,8 +52,3 @@
 - import_tasks: storage-class.yaml
   tags: storage_creation
   when: rook_storage_classes | default([]) | length
-
-# Optionally mount filesystem on host
-#- import_tasks: mount-on-host.yaml
-#  tags: storage_mount
-#  when: rook_mount_on_host is defined and rook_mount_on_host is iterable

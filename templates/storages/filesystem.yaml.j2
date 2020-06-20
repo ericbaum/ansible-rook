@@ -1,4 +1,4 @@
-## See https://github.com/rook/rook/blob/v1.3.3/cluster/examples/kubernetes/ceph/common.yaml#L252
+## See https://github.com/rook/rook/blob/v1.3.6/cluster/examples/kubernetes/ceph/common.yaml#L252
 
 apiVersion: ceph.rook.io/v1
 kind: CephFilesystem
@@ -10,7 +10,7 @@ spec:
   # The metadata pool spec. Must use replication (for the moment? - because allows erausreCoded as well)
   metadataPool:
     failureDomain: {{ item.metadataPool.failureDomain | default('host', true) }}
-    compressionMode: {{ pool.compressionMode | default('none') }}
+    compressionMode: {{ item.metadataPool.compressionMode | default('none') }}
 {% if item.metadataPool.erasureCoded is defined %}
     erasureCoded:
       dataChunks: {{ item.metadataPool.erasureCoded.dataChunks | default(2) }}

@@ -1,4 +1,4 @@
-## curl -L https://raw.githubusercontent.com/rook/rook/v1.3.4/cluster/examples/kubernetes/ceph/common.yaml > common.yaml
+## curl -L https://raw.githubusercontent.com/rook/rook/v1.3.6/cluster/examples/kubernetes/ceph/common.yaml > common.yaml
 
 ###################################################################################################################
 # Create the common resources that are necessary to start the operator and the ceph cluster.
@@ -177,7 +177,7 @@ spec:
                   type: boolean
             cleanupPolicy:
               properties:
-                deleteDataDirOnHosts:
+                confirmation:
                   type: string
                   pattern: ^$|^yes-really-destroy-data$
             placement: {}
@@ -538,6 +538,8 @@ spec:
               - passive
               - aggressive
               - force
+            parameters:
+              type: object
   subresources:
     status: {}
 # OLM: END CEPH BLOCK POOL CRD
